@@ -1,0 +1,433 @@
+<div id="json-form-container" class="json-form-container">
+
+  <div class="json-form-header">
+    <button id="btn-generate-json" class="btn-generate-json" type="button">Generate JSON</button>
+  </div>
+
+  <form id="json-form" class="json-form">
+
+    <fieldset class="form-section" data-section="0">
+      <legend>Modal - Members - Detail Step</legend>
+      <label for="members-detail-title">Title</label>
+      <input id="members-detail-title" name="modal.members.detailStep.title" type="text" class="json-input" />
+
+      <label for="members-detail-ctaText">CTA Text</label>
+      <input id="members-detail-ctaText" name="modal.members.detailStep.ctaText" type="text" class="json-input" />
+
+      <label for="members-detail-subtitleText">Subtitle Text</label>
+      <input id="members-detail-subtitleText" name="modal.members.detailStep.subtitleText" type="text" class="json-input" />
+    </fieldset>
+
+    <fieldset class="form-section" data-section="1" style="display:none;">
+      <legend>Modal - Members - Welcome Step</legend>
+
+      <label for="members-welcome-title">Title</label>
+      <input id="members-welcome-title" name="modal.members.welcomeStep.title" type="text" class="json-input" />
+
+      <label for="members-welcome-copyText">Copy Text</label>
+      <input id="members-welcome-copyText" name="modal.members.welcomeStep.copyText" type="text" class="json-input" />
+
+      <label for="members-welcome-abortText">Abort Text</label>
+      <input id="members-welcome-abortText" name="modal.members.welcomeStep.abortText" type="text" class="json-input" />
+
+      <label for="members-welcome-termsText">Terms Text</label>
+      <input id="members-welcome-termsText" name="modal.members.welcomeStep.termsText" type="text" class="json-input" />
+
+      <label for="members-welcome-continueText">Continue Text</label>
+      <input id="members-welcome-continueText" name="modal.members.welcomeStep.continueText" type="text" class="json-input" />
+
+      <label for="members-welcome-subtitleText">Subtitle Text</label>
+      <input id="members-welcome-subtitleText" name="modal.members.welcomeStep.subtitleText" type="text" class="json-input" />
+
+      <div class="items-group">
+        <p><strong>Items (text & description):</strong></p>
+        <div class="item-pair">
+          <input placeholder="Item 1 Text" name="modal.members.welcomeStep.items[0].text" type="text" class="json-input" />
+          <input placeholder="Item 1 Description" name="modal.members.welcomeStep.items[0].description" type="text" class="json-input" />
+        </div>
+        <div class="item-pair">
+          <input placeholder="Item 2 Text" name="modal.members.welcomeStep.items[1].text" type="text" class="json-input" />
+          <input placeholder="Item 2 Description" name="modal.members.welcomeStep.items[1].description" type="text" class="json-input" />
+        </div>
+        <div class="item-pair">
+          <input placeholder="Item 3 Text" name="modal.members.welcomeStep.items[2].text" type="text" class="json-input" />
+          <input placeholder="Item 3 Description" name="modal.members.welcomeStep.items[2].description" type="text" class="json-input" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section" data-section="2" style="display:none;">
+      <legend>Modal - Members - Redirect Step</legend>
+      <label for="members-redirect-title">Title</label>
+      <input id="members-redirect-title" name="modal.members.redirectStep.title" type="text" class="json-input" />
+
+      <label for="members-redirect-ctaText">CTA Text</label>
+      <input id="members-redirect-ctaText" name="modal.members.redirectStep.ctaText" type="text" class="json-input" />
+
+      <label for="members-redirect-subtitleText">Subtitle Text</label>
+      <input id="members-redirect-subtitleText" name="modal.members.redirectStep.subtitleText" type="text" class="json-input" />
+    </fieldset>
+
+    <fieldset class="form-section" data-section="3" style="display:none;">
+      <legend>Modal - Anonymous - Login Step</legend>
+      <label for="anonymous-login-title">Title</label>
+      <input id="anonymous-login-title" name="modal.anonymous.loginStep.title" type="text" class="json-input" />
+
+      <label for="anonymous-login-subtitleText">Subtitle Text</label>
+      <input id="anonymous-login-subtitleText" name="modal.anonymous.loginStep.subtitleText" type="text" class="json-input" />
+    </fieldset>
+
+    <fieldset class="form-section" data-section="4" style="display:none;">
+      <legend>Modal - Anonymous - Welcome Step</legend>
+
+      <label for="anonymous-welcome-title">Title</label>
+      <input id="anonymous-welcome-title" name="modal.anonymous.welcomeStep.title" type="text" class="json-input" />
+
+      <label for="anonymous-welcome-copyText">Copy Text</label>
+      <input id="anonymous-welcome-copyText" name="modal.anonymous.welcomeStep.copyText" type="text" class="json-input" />
+
+      <label for="anonymous-welcome-abortText">Abort Text</label>
+      <input id="anonymous-welcome-abortText" name="modal.anonymous.welcomeStep.abortText" type="text" class="json-input" />
+
+      <label for="anonymous-welcome-termsText">Terms Text</label>
+      <input id="anonymous-welcome-termsText" name="modal.anonymous.welcomeStep.termsText" type="text" class="json-input" />
+
+      <label for="anonymous-welcome-continueText">Continue Text</label>
+      <input id="anonymous-welcome-continueText" name="modal.anonymous.welcomeStep.continueText" type="text" class="json-input" />
+
+      <label for="anonymous-welcome-subtitleText">Subtitle Text</label>
+      <input id="anonymous-welcome-subtitleText" name="modal.anonymous.welcomeStep.subtitleText" type="text" class="json-input" />
+
+      <div class="items-group">
+        <p><strong>Items (text & description):</strong></p>
+        <div class="item-pair">
+          <input placeholder="Item 1 Text" name="modal.anonymous.welcomeStep.items[0].text" type="text" class="json-input" />
+          <input placeholder="Item 1 Description" name="modal.anonymous.welcomeStep.items[0].description" type="text" class="json-input" />
+        </div>
+        <div class="item-pair">
+          <input placeholder="Item 2 Text" name="modal.anonymous.welcomeStep.items[1].text" type="text" class="json-input" />
+          <input placeholder="Item 2 Description" name="modal.anonymous.welcomeStep.items[1].description" type="text" class="json-input" />
+        </div>
+        <div class="item-pair">
+          <input placeholder="Item 3 Text" name="modal.anonymous.welcomeStep.items[2].text" type="text" class="json-input" />
+          <input placeholder="Item 3 Description" name="modal.anonymous.welcomeStep.items[2].description" type="text" class="json-input" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section" data-section="5" style="display:none;">
+      <legend>Banner</legend>
+
+      <label for="banner-mode">Mode</label>
+      <input id="banner-mode" name="banner.mode" type="text" class="json-input" />
+
+      <label for="banner-title">Title</label>
+      <input id="banner-title" name="banner.title" type="text" class="json-input" />
+
+      <label for="banner-ctaText">CTA Text</label>
+      <input id="banner-ctaText" name="banner.ctaText" type="text" class="json-input" />
+
+      <label for="banner-iconUrl">Icon URL</label>
+      <input id="banner-iconUrl" name="banner.iconUrl" type="text" class="json-input" />
+
+      <label for="banner-copyText">Copy Text</label>
+      <input id="banner-copyText" name="banner.copyText" type="text" class="json-input" />
+
+      <label for="banner-badgeText">Badge Text</label>
+      <input id="banner-badgeText" name="banner.badgeText" type="text" class="json-input" />
+
+      <label for="banner-termsText">Terms Text</label>
+      <input id="banner-termsText" name="banner.termsText" type="text" class="json-input" />
+
+      <label for="banner-titleHighlight">Title Highlight</label>
+      <input id="banner-titleHighlight" name="banner.titleHighlight" type="text" class="json-input" />
+
+      <fieldset class="metaData-fieldset" style="margin-top:1rem; border:1px solid #ddd; padding:0.75rem; border-radius:5px;">
+        <legend>MetaData</legend>
+
+        <label for="banner-metaData-niche">Niche</label>
+        <input id="banner-metaData-niche" name="banner.metaData.niche" type="text" class="json-input" />
+
+        <label for="banner-metaData-productId">Product ID</label>
+        <input id="banner-metaData-productId" name="banner.metaData.productId" type="text" class="json-input" />
+
+        <label for="banner-metaData-productName">Product Name</label>
+        <input id="banner-metaData-productName" name="banner.metaData.productName" type="text" class="json-input" />
+
+        <label for="banner-metaData-redirectUrl">Redirect URL</label>
+        <input id="banner-metaData-redirectUrl" name="banner.metaData.redirectUrl" type="text" class="json-input" />
+
+        <label for="banner-metaData-providerName">Provider Name</label>
+        <input id="banner-metaData-providerName" name="banner.metaData.providerName" type="text" class="json-input" />
+      </fieldset>
+    </fieldset>
+
+    <fieldset class="form-section" data-section="6" style="display:none;">
+      <legend>Common</legend>
+      <label for="common-termsUrl">Terms URL</label>
+      <input id="common-termsUrl" name="common.termsUrl" type="text" class="json-input" />
+    </fieldset>
+
+  </form>
+
+  <div class="json-form-navigation">
+    <button id="btn-back" type="button" class="btn-nav" disabled>Back</button>
+    <button id="btn-next" type="button" class="btn-nav">Next</button>
+  </div>
+
+  <div class="json-output-container" style="display:none;">
+    <h3>Generated JSON</h3>
+    <textarea id="json-output" readonly class="json-output"></textarea>
+    <button id="btn-copy-json" class="btn-copy-json" type="button">Copy JSON</button>
+  </div>
+
+</div>
+
+
+
+
+
+<style>
+
+.arrow {
+  position: relative;
+  overflow: visible; /* Ensure that content is not cut off */
+}
+
+.arrow__base, .arrow__line {
+  transform: translateX(0); /* Initial position */
+  fill: #0a41ee; /* Initial fill color */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, fill 0.3s ease-in-out;
+}
+
+.arrow__line {
+  opacity: 0; /* Initially hidden */
+}
+
+.arrow:hover .arrow__base,
+.arrow:hover .arrow__line {
+  fill: #0a41ee; /* Ensure consistent fill color on hover */
+}
+
+.arrow:hover .arrow__base {
+  transform: translateX(8px); /* Move the first path to the right */
+}
+
+.arrow:hover .arrow__line {
+  opacity: 1; /* Fade in the second path */
+  transform: translateX(8px); /* Move the second path to the right */
+}
+
+
+</style>
+
+<script>
+ (function(){
+  function init() {
+    console.log("JSON Form Script Loaded");
+
+    const form = document.getElementById('json-form');
+    const sections = Array.from(form.querySelectorAll('.form-section'));
+    const btnNext = document.getElementById('btn-next');
+    const btnBack = document.getElementById('btn-back');
+    const btnGenerate = document.getElementById('btn-generate-json');
+    const outputContainer = document.querySelector('.json-output-container');
+    const outputTextarea = document.getElementById('json-output');
+    const btnCopy = document.getElementById('btn-copy-json');
+
+    let currentSectionIndex = 0;
+
+    function showSection(index) {
+      sections.forEach((section, i) => {
+        section.style.display = i === index ? 'block' : 'none';
+      });
+      btnBack.disabled = index === 0;
+      btnNext.textContent = index === sections.length - 1 ? 'Finish' : 'Next';
+    }
+
+    function collectFormData() {
+      const data = {};
+
+      for (const input of form.querySelectorAll('.json-input')) {
+        if (!input.name) continue;
+        const value = input.value;
+
+        const path = input.name.replace(/\]/g, '').split(/\.|\[/);
+        let target = data;
+
+        for (let i = 0; i < path.length; i++) {
+          const key = path[i];
+
+          if (i === path.length - 1) {
+            target[key] = value;
+          } else {
+            const nextKey = path[i + 1];
+            if (!target[key]) {
+              if (!isNaN(parseInt(nextKey))) {
+                target[key] = [];
+              } else {
+                target[key] = {};
+              }
+            }
+            target = target[key];
+          }
+        }
+      }
+
+      return data;
+    }
+
+    function generateJSON() {
+      const jsonData = collectFormData();
+      const jsonString = JSON.stringify(jsonData, null, 2);
+      outputTextarea.value = jsonString;
+      outputContainer.style.display = 'block';
+      outputTextarea.focus();
+      outputTextarea.select();
+    }
+
+    btnNext.addEventListener('click', () => {
+      if (currentSectionIndex < sections.length - 1) {
+        currentSectionIndex++;
+        showSection(currentSectionIndex);
+      } else {
+        generateJSON();
+      }
+    });
+
+    btnBack.addEventListener('click', () => {
+      if (currentSectionIndex > 0) {
+        currentSectionIndex--;
+        showSection(currentSectionIndex);
+      }
+    });
+
+    btnGenerate.addEventListener('click', () => {
+      generateJSON();
+    });
+
+    btnCopy.addEventListener('click', () => {
+      outputTextarea.select();
+      document.execCommand('copy');
+      btnCopy.textContent = 'Copied!';
+      setTimeout(() => {
+        btnCopy.textContent = 'Copy JSON';
+      }, 1500);
+    });
+
+    showSection(currentSectionIndex);
+  }
+
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+
+</script>
+
+
+<style>
+ #json-form-container {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 1rem auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+}
+
+#json-form-container * {
+  box-sizing: border-box;
+}
+
+.json-form-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btn-generate-json {
+  background: #0073e6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.json-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.json-form-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.btn-nav {
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #0073e6;
+  background: white;
+  color: #0073e6;
+  cursor: pointer;
+}
+
+.btn-nav:disabled {
+  color: #aaa;
+  border-color: #aaa;
+  cursor: default;
+}
+
+.json-output-container {
+  margin-top: 2rem;
+}
+
+#json-output {
+  width: 95%;
+  min-height: 200px;
+  font-family: monospace;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.btn-copy-json {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #28a745;
+  background: white;
+  color: #28a745;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+label + br {
+  display: none;
+}
+</style>
+
+
+

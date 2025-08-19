@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSON Form Generator</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #formContainer {
+        max-width: 980px;
+        width: 100%;
+    }
+
+    .form-section {
+        background: #fff;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 6px;
+    }
+
+    .form-section h2 {
+        background: #eee;
+        margin: -15px -15px 15px -15px;
+        padding: 10px;
+        font-size: 1.15em;
+    }
+
+    label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+        font-size: 0.95em;
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 6px;
+        margin-top: 4px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .bullet-container {
+        border: 1px solid #ccc;
+        padding: 12px;
+        border-radius: 6px;
+        background: #fafafa;
+        margin-top: 8px;
+    }
+
+    .bullet-item {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #ccc;
+    }
+
+    .bullet-item:last-child {
+        border-bottom: none;
+    }
+
+    .add-bullet-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        background: #0a41ee;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #generateBtn {
+        padding: 10px 20px;
+        font-size: 1em;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 10px 5px 0;
+    }
+
+    .output-container {
+        max-width: 980px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        position: relative;
+    }
+
+    pre {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 16px 16px 24px 16px;
+        border-radius: 6px;
+        overflow: auto;
+        white-space: pre-wrap;
+        margin-top: 12px;
+        width: 100%;
+        display: none; /* hidden until generated */
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    /* small copy button at the corner of the JSON box */
+    .copy-btn {
+        display: none; /* only shown once JSON is generated */
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 6px 10px;
+        font-size: 12px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+    }
+    .copy-btn:active { transform: translateY(1px); }
+
+    /* Toast */
+    .toast {
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 10px;
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.25s ease, visibility 0.25s ease, bottom 0.25s ease;
+    }
+    .toast.show {
+        visibility: visible;
+        opacity: 1;
+        bottom: 48px;
+    }
+</style>
+</head>
+<body>
+
+<div id="formContainer"></div>
+<button id="generateBtn">Generate JSON</button>
+
+<div class="output-container">
+    <pre id="output" aria-live="polite" role="region"></pre>
+    <button id="copyBtn" class="copy-btn" aria-label="Copy JSON">Copy</button>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite">JSON copied to clipboard!</div>
+
+<script>
+/* ===== Template (now starts with 1 item by default in each welcomeStep) ===== */
+const template = {
+    "modal": {
+        "members": {
+            "detailStep": {
+                "title": "",
+                "ctaText": "",
+                "subtitleText": ""
+            },
+            "welcomeStep": {
+                "items": [
+                    { "text": "", "description": "" }
+                ],
+                "title": "",
+                "copyText": "",
+                "abortText": "",
+                "termsText": "",
+                "continueText": "",
+                "subtitleText": ""
+            },
+            "redirectStep": {
+                "title": "",
+                "ctaText": "",
+                "subtitleText": ""
+            }
+        },
+        "anonymous": {
+            "loginStep": {
+                "title": "",
+                "subtitleText": ""
+            },
+            "welcomeStep": {
+                "items": [
+                    { "text": "", "description": "" }
+                ],
+                "title": "",
+                "copyText": "",
+                "abortText": "",
+                "termsText": "",
+                "continueText": "",
+                "subtitleText": ""
+            }
+        }
+    },
+    "banner": {
+        "mode": "",
+        "title": "",
+        "ctaText": "",
+        "iconUrl": "",
+        "copyText": "",
+        "metaData": {
+            "niche": "",
+            "productId": "",
+            "productName": "",
+            "redirectUrl": "",
+            "providerName": ""
+        },
+        "badgeText": "",
+        "termsText": "",
+        "titleHighlight": ""
+    },
+    "common": {
+        "termsUrl": ""
+    }
+};
+
+/* Human-friendly labels */
+const labelOverrides = {
+    "banner.metaData": "Metadata",
+    "banner.metaData.niche": "niche",
+    "banner.metaData.productId": "Product ID",
+    "banner.metaData.productName": "Product Name",
+    "banner.metaData.redirectUrl": "Redirect URL",
+    "banner.metaData.providerName": "Provider Name",
+
+    "items": "Bullet points",
+    "text": "Main text (bold)",
+    "description": "Secondary text",
+
+    "modal.members.detailStep": "Members · Detail Step",
+    "modal.members.welcomeStep": "Members · Welcome Step",
+    "modal.members.redirectStep": "Members · Redirect Step",
+    "modal.anonymous.loginStep": "Anonymous · Login Step",
+    "modal.anonymous.welcomeStep": "Anonymous · Welcome Step"
+};
+
+const formContainer = document.getElementById("formContainer");
+
+/* Map id -> {paths: [pathArray,...]} */
+const valueMap = new Map();
+
+/* Render text input */
+function renderInput(label, fieldId) {
+    const wrapper = document.createElement("div");
+    const lbl = document.createElement("label");
+    lbl.textContent = label;
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.dataset.fieldId = fieldId;
+    wrapper.appendChild(lbl);
+    wrapper.appendChild(inp);
+    return wrapper;
+}
+
+/* Add one bullet item (text + description) to a container and map it */
+function addBulletItem(container, path, index) {
+    const bulletDiv = document.createElement("div");
+    bulletDiv.className = "bullet-item";
+
+    const mainId = `${path.join(".")}.${index}.text`;
+    const secId  = `${path.join(".")}.${index}.description`;
+
+    valueMap.set(mainId, { paths: [[...path, index, "text"]], id: mainId });
+    valueMap.set(secId,  { paths: [[...path, index, "description"]], id: secId });
+
+    bulletDiv.appendChild(renderInput(labelOverrides["text"] || "text", mainId));
+    bulletDiv.appendChild(renderInput(labelOverrides["description"] || "description", secId));
+
+    container.appendChild(bulletDiv);
+}
+
+/* Render bullet list with dynamic +Add button for welcomeStep.items */
+function renderBulletPoints(array, path) {
+    const container = document.createElement("div");
+    container.className = "bullet-container";
+
+    // Initial items from template
+    for (let i = 0; i < array.length; i++) {
+        addBulletItem(container, path, i);
+    }
+
+    const pathStr = path.join(".");
+    const isWelcomeItems = /modal\.(members|anonymous)\.welcomeStep\.items$/.test(pathStr);
+
+    if (isWelcomeItems) {
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "add-bullet-btn";
+        addBtn.textContent = "+ Add Item";
+        addBtn.addEventListener("click", () => {
+            const nextIndex = container.querySelectorAll(".bullet-item").length;
+            addBulletItem(container, path, nextIndex);
+        });
+        container.appendChild(addBtn);
+    }
+
+    return container;
+}
+
+/* Recursively render sections/objects */
+function renderSection(sectionName, obj, prefix = []) {
+    const sectionDiv = document.createElement("div");
+    sectionDiv.className = "form-section";
+
+    const headingLabel = labelOverrides[prefix.join(".")] || sectionName;
+    if (headingLabel) {
+        sectionDiv.innerHTML = `<h2>${headingLabel}</h2>`;
+    }
+
+    for (let key in obj) {
+        const value = obj[key];
+        const path = [...prefix, key];
+
+        if (Array.isArray(value) && key === "items") {
+            // Bullet array (welcome steps)
+            const bullets = renderBulletPoints(value, path);
+            sectionDiv.appendChild(bullets);
+        } else if (typeof value === "object" && value !== null) {
+            if (key === "metaData") {
+                // Flatten metaData fields as inputs
+                for (let metaKey in value) {
+                    const metaId = `${path.join(".")}.${metaKey}`;
+                    valueMap.set(metaId, { paths: [[...path, metaKey]], id: metaId });
+                    sectionDiv.appendChild(
+                        renderInput(labelOverrides[path.join(".") + "." + metaKey] || metaKey, metaId)
+                    );
+                }
+            } else {
+                // Nested sections
+                sectionDiv.appendChild(renderSection(key, value, path));
+            }
+        } else {
+            // Primitive field
+            const fieldId = path.join(".");
+            valueMap.set(fieldId, { paths: [path], id: fieldId });
+            sectionDiv.appendChild(renderInput(labelOverrides[path.join(".")] || key, fieldId));
+        }
+    }
+    return sectionDiv;
+}
+
+/* === Build the full form === */
+formContainer.appendChild(renderSection("Banner", template.banner, ["banner"]));
+formContainer.appendChild(renderSection("Modal · Members", template.modal.members, ["modal", "members"]));
+formContainer.appendChild(renderSection("Modal · Anonymous", template.modal.anonymous, ["modal", "anonymous"]));
+formContainer.appendChild(renderSection("Common", template.common, ["common"]));
+
+/* === Robust setter that creates missing array/object nodes === */
+function setDeep(root, path, value) {
+    let ref = root;
+    for (let i = 0; i < path.length - 1; i++) {
+        const key = path[i];
+        const nextKey = path[i + 1];
+
+        if (typeof key === "number") {
+            // key for array index
+            if (!Array.isArray(ref)) {
+                // If somehow not an array, replace with array
+                // (shouldn't happen with our template)
+                ref = [];
+            }
+            if (ref[key] == null) {
+                ref[key] = (typeof nextKey === "number") ? [] : {};
+            }
+            ref = ref[key];
+        } else {
+            // key is string
+            if (ref[key] == null) {
+                ref[key] = (typeof nextKey === "number") ? [] : {};
+            }
+            ref = ref[key];
+        }
+    }
+    const lastKey = path[path.length - 1];
+    ref[lastKey] = value;
+}
+
+/* === Generate JSON === */
+document.getElementById("generateBtn").addEventListener("click", () => {
+    // Deep clone template
+    const updatedJSON = JSON.parse(JSON.stringify(template));
+
+    document.querySelectorAll("[data-field-id]").forEach(inp => {
+        const mapEntry = valueMap.get(inp.dataset.fieldId);
+        if (!mapEntry) return;
+        mapEntry.paths.forEach(p => {
+            setDeep(updatedJSON, p, inp.value);
+        });
+    });
+
+    const outputEl = document.getElementById("output");
+    outputEl.textContent = JSON.stringify(updatedJSON, null, 4);
+    outputEl.style.display = "block";
+
+    // Show corner copy button
+    document.getElementById("copyBtn").style.display = "inline-block";
+});
+
+/* === Copy + Toast === */
+function showToast() {
+    const toast = document.getElementById("toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+document.getElementById("copyBtn").addEventListener("click", () => {
+    const jsonText = document.getElementById("output").textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonText).then(showToast);
+    } else {
+        // Fallback for older browsers
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById("output"));
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+            document.execCommand("copy");
+            showToast();
+        } catch (e) {
+            alert("Press Ctrl/Cmd + C to copy.");
+        }
+        sel.removeAllRanges();
+    }
+});
+</script>
+
+</body>
+</html>

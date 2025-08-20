@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Full JSON Form Generator (complete)</title>
+<style>
+  :root {
+    --muted: #666;
+    --bg: #f5f5f5;
+    --card: #fff;
+    --code-bg: #272822;
+    --toast-bg: #333;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    margin: 20px;
+    color: #111;
+  }
+  h1 { margin-top: 0; }
+  #formContainer { max-width: 980px; margin: 0 auto 20px; }
+  .form-section {
+    background: var(--card);
+    border: 1px solid #ddd;
+    margin-bottom: 18px;
+    padding: 14px;
+    border-radius: 8px;
+  }
+  .form-section h2 {
+    margin: -14px -14px 12px -14px;
+    padding: 10px;
+    background: #efefef;
+    border-radius: 6px 6px 0 0;
+    font-size: 1.05rem;
+  }
+  label { display:block; margin-top:8px; font-weight:600; font-size:0.95rem; }
+  input[type="text"], textarea {
+    width:100%;
+    padding:8px;
+    margin-top:6px;
+    box-sizing:border-box;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:14px;
+  }
+  .bullet-container {
+    border:1px solid #ddd;
+    background:#fafafa;
+    padding:10px;
+    border-radius:6px;
+    margin-top:8px;
+    position:relative;
+  }
+  .bullet-item {
+    padding:10px 10px 10px 10px;
+    border-bottom:1px dashed #ccc;
+    position:relative;
+    margin-bottom:10px;
+    border-radius:4px;
+    background: #fff;
+  }
+  .bullet-item:last-child { border-bottom:none; margin-bottom:0; }
+  .add-bullet-btn {
+    margin-top:8px;
+    padding:6px 10px;
+    border-radius:6px;
+    background:#0a41ee;
+    color:white;
+    border:0;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .remove-bullet-btn {
+    position:absolute;
+    right:10px;
+    top:10px;
+    padding:5px 8px;
+    border-radius:6px;
+    background:#d9534f;
+    color:white;
+    border:0;
+    font-size:12px;
+    cursor:pointer;
+  }
+  #controls { max-width:980px; margin: 0 auto 14px; display:flex; gap:8px; flex-wrap:wrap; }
+  button.control {
+    padding:10px 14px;
+    border-radius:6px;
+    border:0;
+    cursor:pointer;
+    color:white;
+    background:#28a745;
+  }
+  button.control.save { background:#007bff; }
+  button.control.load { background:#17a2b8; }
+  button.control.clear { background:#d9534f; }
+  button.small {
+    padding:6px 8px; border-radius:6px; border:0; cursor:pointer; font-size:13px;
+  }
+
+  /* Output area */
+  .output-container { max-width:980px; margin: 0 auto; position:relative; }
+  pre#output {
+    display:none;
+    background: var(--code-bg);
+    color: #f8f8f2;
+    padding:14px;
+    border-radius:6px;
+    white-space:pre-wrap;
+    box-sizing:border-box;
+    min-height:120px;
+    position:relative;
+  }
+  button#copyBtn {
+    display:none;
+    position:absolute;
+    right:12px;
+    top:8px;
+    padding:6px 10px;
+    border-radius:6px;
+    border:0;
+    background:rgba(0,0,0,0.6);
+    color:white;
+    cursor:pointer;
+    z-index:10;
+  }
+
+  /* Toast */
+  .toast {
+    visibility:hidden;
+    min-width:200px;
+    background:var(--toast-bg);
+    color:white;
+    text-align:center;
+    border-radius:6px;
+    padding:10px 14px;
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:30px;
+    z-index:2000;
+    opacity:0;
+    transition:opacity .25s ease, visibility .25s ease, bottom .25s ease;
+  }
+  .toast.show { visibility:visible; opacity:1; bottom:48px; }
+
+  /* slightly smaller labels for code-like ids (debug) - not used visually */
+  .debug { font-size:12px; color:#777; margin-top:4px; }
+</style>
+</head>
+<body>
+  <h1>Full JSON Form Generator (complete)</h1>
+
+  <div id="formContainer"></div>
+
+  <div id="controls">
+    <button id="generateBtn" class="control">Generate JSON</button>
+    <button id="saveFileBtn" class="control save">Save JSON (file)</button>
+    <button id="saveLocalBtn" class="control">Save Locally</button>
+    <button id="loadLocalBtn" class="control load">Load Saved</button>
+    <button id="clearBtn" class="control clear">Clear Form (reset to defaults)</button>
+  </div>
+
+  <div class="output-container">
+    <pre id="output" aria-live="polite" role="region"><code id="outputCode"></code></pre>
+    <button id="copyBtn">Copy</button>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Message</div>
+
+<script>
+/* ===========================
+   Defaults (your provided JSON)
+   =========================== */
+const defaults = {
+    "modal": {
+        "members": {
+            "detailStep": {
+                "title": "Get $150 from Finder -0",
+                "ctaText": "Go to Chime",
+                "subtitleText": "The email you register with Finder and Chime must be the same to be eligible for the $150 gift card"
+            },
+            "welcomeStep": {
+                "items": [
+                    { "text": "Tell us your first and last name.", "description": "" },
+                    { "text": "Open a Chime Checking Account online via Finder. You must click through from Finder to be eligible.", "description": "" },
+                    { "text": "Receive $150 gift card within 90 days", "description": "" }
+                ],
+                "title": "Get $150 from Finder -1",
+                "copyText": "Ends on September 30, 2025",
+                "abortText": "SKIP REWARD, CONTINUE TO CHIME",
+                "termsText": "T&Cs apply",
+                "continueText": "GET $150 REWARD",
+                "subtitleText": ""
+            },
+            "redirectStep": {
+                "title": "You're a Finder member!",
+                "ctaText": "Go to Chime",
+                "subtitleText": "Continue on to the Chime's website to open a Chime Checking Account"
+            }
+        },
+        "anonymous": {
+            "loginStep": {
+                "title": "Get $150 from Finder -2",
+                "subtitleText": "Use the same email address to register with Finder and Chime to qualify for the $150 gift card."
+            },
+            "welcomeStep": {
+                "items": [
+                    { "text": "Click Get $150 Reward", "description": "And quickly create a Finder account." },
+                    { "text": "Open a Chime Checking Account and set up direct deposit", "description": "Must receive a qualifying direct deposit of $200 or more within 30 days from enrollment." },
+                    { "text": "Receive $150 gift card within 90 days.", "description": "Your Finder account email must be the same as the email used to create your Chime Checking Account." }
+                ],
+                "title": "Get $150 from Finder -3",
+                "copyText": "Ends on September 30, 2025 T&Cs apply",
+                "abortText": "SKIP REWARD, CONTINUE TO CHIME",
+                "termsText": "",
+                "continueText": "GET $150 REWARD",
+                "subtitleText": ""
+            }
+        }
+    },
+    "banner": {
+        "mode": "modal",
+        "title": "Get $150 from Finder -4",
+        "ctaText": "GET DEAL",
+        "iconUrl": "https://www.finder.com/niche-builder/664f49da27c8f.png",
+        "copyText": "Open a Chime Checking Account online through Finder by September 30, 2025 to receive a <b>$150 gift card</b>",
+        "metaData": {
+            "niche": "USFSA-CHK",
+            "productId": "0744e84d-89bc-4025-86ba-637abe96f22c",
+            "productName": "Chime",
+            "redirectUrl": "https://t.finder.com/aff_c?offer_id=25836&aff_id=1043",
+            "providerName": "Chime"
+        },
+        "badgeText": "FINDER REWARDS EXCLUSIVE",
+        "termsText": "Separate T&Cs apply",
+        "titleHighlight": "$150"
+    },
+    "common": {
+        "termsUrl": "https://www.finder.com/about-us/finder-150-chime-promotion-terms-and-conditions"
+    }
+};
+
+/* ===========================
+   Template shape (empty placeholders)
+   =========================== */
+const template = {
+  modal: {
+    members: {
+      detailStep: { title: "", ctaText: "", subtitleText: "" },
+      welcomeStep: { items: [], title:"", copyText:"", abortText:"", termsText:"", continueText:"", subtitleText:"" },
+      redirectStep: { title:"", ctaText:"", subtitleText:"" }
+    },
+    anonymous: {
+      loginStep: { title:"", subtitleText:"" },
+      welcomeStep: { items: [], title:"", copyText:"", abortText:"", termsText:"", continueText:"", subtitleText:"" }
+    }
+  },
+  banner: {
+    mode:"", title:"", ctaText:"", iconUrl:"", copyText:"", metaData:{ niche:"", productId:"", productName:"", redirectUrl:"", providerName:"" }, badgeText:"", termsText:"", titleHighlight:""
+  },
+  common: { termsUrl:"" }
+};
+
+/* label overrides */
+const labelOverrides = {
+  "banner.metaData": "Metadata",
+  "banner.metaData.niche": "niche",
+  "banner.metaData.productId": "Product ID",
+  "banner.metaData.productName": "Product Name",
+  "banner.metaData.redirectUrl": "Redirect URL",
+  "banner.metaData.providerName": "Provider Name",
+  "items":"Bullet points",
+  "text":"Main text (bold)",
+  "description":"Secondary text",
+  "modal.members.detailStep":"Members · Detail Step",
+  "modal.members.welcomeStep":"Members · Welcome Step",
+  "modal.members.redirectStep":"Members · Redirect Step",
+  "modal.anonymous.loginStep":"Anonymous · Login Step",
+  "modal.anonymous.welcomeStep":"Anonymous · Welcome Step"
+};
+
+/* form container and valueMap */
+const formContainer = document.getElementById('formContainer');
+const valueMap = new Map(); // fieldId -> { paths: [path arrays], id }
+
+/* helper: get value by path from object */
+function getByPath(obj, path) {
+  try { return path.reduce((o,k) => (o==null?undefined:o[k]), obj); } catch(e) { return undefined; }
+}
+
+/* attach default behavior: grey default text, clear on focus, restore on blur */
+function attachDefaultClearHandlers(inp, defaultValue) {
+  inp.dataset.default = defaultValue ?? "";
+  const hasDefault = (defaultValue !== undefined && defaultValue !== null && String(defaultValue).length > 0);
+  if (hasDefault) {
+    // show default as initial value in muted color
+    inp.value = String(defaultValue);
+    inp.style.color = 'var(--muted)';
+  }
+  inp.addEventListener('focus', function() {
+    if (this.value === this.dataset.default) {
+      this.value = '';
+      this.style.color = '#000';
+    }
+  });
+  inp.addEventListener('blur', function() {
+    if (!this.value) {
+      this.value = this.dataset.default;
+      this.style.color = this.dataset.default ? 'var(--muted)' : '#000';
+    }
+  });
+  inp.addEventListener('input', function() {
+    this.style.color = this.value ? '#000' : (this.dataset.default ? 'var(--muted)' : '#000');
+  });
+}
+
+/* render a labeled input with a data-field-id and optional defaultValue */
+function renderInput(label, fieldId, defaultValue = "") {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'input-wrapper';
+  const lbl = document.createElement('label');
+  lbl.textContent = label;
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.dataset.fieldId = fieldId;
+  attachDefaultClearHandlers(inp, defaultValue);
+  wrapper.appendChild(lbl);
+  wrapper.appendChild(inp);
+  return wrapper;
+}
+
+/* add bullet item (returns the created bulletDiv) */
+function addBulletItem(container, path, index, defaultItem = {}, initialValue = {}) {
+  const bulletDiv = document.createElement('div');
+  bulletDiv.className = 'bullet-item';
+
+  const mainId = `${path.join(".")}.${index}.text`;
+  const secId  = `${path.join(".")}.${index}.description`;
+
+  // map ids
+  valueMap.set(mainId, { paths: [[...path, index, 'text']], id: mainId });
+  valueMap.set(secId,  { paths: [[...path, index, 'description']], id: secId });
+
+  // create inputs (defaultItem used for dataset.default)
+  const mainInputWrapper = renderInput(labelOverrides['text'] || 'text', mainId, defaultItem.text || "");
+  const descInputWrapper = renderInput(labelOverrides['description'] || 'description', secId, defaultItem.description || "");
+
+  // append to bulletDiv
+  bulletDiv.appendChild(mainInputWrapper);
+  bulletDiv.appendChild(descInputWrapper);
+
+  // remove button
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'remove-bullet-btn';
+  removeBtn.textContent = 'Remove';
+  removeBtn.addEventListener('click', () => {
+    bulletDiv.remove();
+    // we intentionally do not reindex valueMap here; mapping is deterministic based on container's path+index when generating JSON
+    // items arrays are rebuilt from DOM when generating JSON.
+  });
+  bulletDiv.appendChild(removeBtn);
+
+  container.appendChild(bulletDiv);
+
+  // if initialValue provided, override display value (treat as a user-entered value)
+  if (initialValue && (initialValue.text !== undefined || initialValue.description !== undefined)) {
+    const inputs = bulletDiv.querySelectorAll('input[type="text"]');
+    if (initialValue.text !== undefined && inputs[0]) {
+      inputs[0].value = initialValue.text;
+      inputs[0].style.color = '#000';
+    }
+    if (initialValue.description !== undefined && inputs[1]) {
+      inputs[1].value = initialValue.description;
+      inputs[1].style.color = '#000';
+    }
+  }
+
+  return bulletDiv;
+}
+
+/* render bullet points for arrays, using defaultsRoot to seed default values */
+function renderBulletPoints(arrayShape, path, defaultsRoot) {
+  const container = document.createElement('div');
+  container.className = 'bullet-container items-container';
+  container.dataset.path = JSON.stringify(path);
+
+  const defaultsArray = getByPath(defaultsRoot, path) || [];
+  const initialLen = Math.max(defaultsArray.length, 1);
+
+  for (let i=0;i<initialLen;i++) {
+    addBulletItem(container, path, i, defaultsArray[i] || {});
+  }
+
+  const pathStr = path.join('.');
+  const isWelcomeItems = /modal\.(members|anonymous)\.welcomeStep\.items$/.test(pathStr);
+  if (isWelcomeItems) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'add-bullet-btn';
+    addBtn.textContent = '+ Add Item';
+    addBtn.addEventListener('click', () => {
+      const nextIndex = container.querySelectorAll('.bullet-item').length;
+      addBulletItem(container, path, nextIndex, {});
+    });
+    container.appendChild(addBtn);
+  }
+  return container;
+}
+
+/* recursively render the template sections using defaultsRoot */
+function renderSection(sectionName, obj, prefix = [], defaultsRoot = {}) {
+  const sectionDiv = document.createElement('div');
+  sectionDiv.className = 'form-section';
+  const heading = labelOverrides[prefix.join('.')] || sectionName;
+  if (heading) sectionDiv.innerHTML = `<h2>${heading}</h2>`;
+
+  for (const key in obj) {
+    const value = obj[key];
+    const path = [...prefix, key];
+    const defaultAtPath = getByPath(defaultsRoot, path);
+
+    if (Array.isArray(value) && key === 'items') {
+      const bullets = renderBulletPoints(value, path, defaultsRoot);
+      sectionDiv.appendChild(bullets);
+    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (key === 'metaData') {
+        for (const metaKey in value) {
+          const metaId = `${path.join('.')}.${metaKey}`;
+          valueMap.set(metaId, { paths: [[...path, metaKey]], id: metaId });
+          sectionDiv.appendChild(renderInput(labelOverrides[path.join('.') + '.' + metaKey] || metaKey, metaId, (defaultAtPath && defaultAtPath[metaKey]) || ""));
+        }
+      } else {
+        sectionDiv.appendChild(renderSection(key, value, path, defaultsRoot));
+      }
+    } else {
+      const fieldId = path.join('.');
+      valueMap.set(fieldId, { paths: [[...path]], id: fieldId });
+      sectionDiv.appendChild(renderInput(labelOverrides[path.join('.')] || key, fieldId, (defaultAtPath !== undefined && defaultAtPath !== null) ? defaultAtPath : ""));
+    }
+  }
+
+  return sectionDiv;
+}
+
+/* Build the full form into DOM using template and defaults */
+formContainer.appendChild(renderSection('Banner', template.banner, ['banner'], defaults));
+formContainer.appendChild(renderSection('Modal · Members', template.modal.members, ['modal','members'], defaults));
+formContainer.appendChild(renderSection('Modal · Anonymous', template.modal.anonymous, ['modal','anonymous'], defaults));
+formContainer.appendChild(renderSection('Common', template.common, ['common'], defaults));
+
+/* ============== JSON building utilities ============== */
+
+/* robust setDeep used to create nested nodes (handles arrays when numeric keys present) */
+function setDeep(root, path, value) {
+  let ref = root;
+  for (let i=0;i<path.length-1;i++) {
+    const key = path[i];
+    const nextKey = path[i+1];
+    if (typeof key === 'number') {
+      if (!Array.isArray(ref)) ref = []; // defensive
+      if (ref[key] == null) ref[key] = (typeof nextKey === 'number') ? [] : {};
+      ref = ref[key];
+    } else {
+      if (ref[key] == null) ref[key] = (typeof nextKey === 'number') ? [] : {};
+      ref = ref[key];
+    }
+  }
+  const lastKey = path[path.length-1];
+  ref[lastKey] = value;
+}
+
+/* rebuild arrays for each .items-container using DOM order (respects add/remove) */
+function rebuildItemsArrays(updatedJSON) {
+  document.querySelectorAll('.items-container').forEach(container => {
+    const path = JSON.parse(container.dataset.path);
+    const items = [];
+    container.querySelectorAll('.bullet-item').forEach(bi => {
+      const inputs = bi.querySelectorAll('input[type="text"]');
+      const textVal = inputs[0] ? inputs[0].value : "";
+      const descVal = inputs[1] ? inputs[1].value : "";
+      items.push({ text: textVal, description: descVal });
+    });
+    setDeep(updatedJSON, path, items);
+  });
+}
+
+/* buildJSON: clone template, fill non-array fields via valueMap, then rebuild items arrays */
+function buildJSON() {
+  const updatedJSON = JSON.parse(JSON.stringify(template));
+  // set primitive values
+  document.querySelectorAll('[data-field-id]').forEach(inp => {
+    const mapEntry = valueMap.get(inp.dataset.fieldId);
+    if (!mapEntry) return;
+    mapEntry.paths.forEach(p => {
+      // convert p entries that are numeric strings to numbers? p was created with numbers for indexes, so fine
+      setDeep(updatedJSON, p, inp.value);
+    });
+  });
+  // override items arrays with current DOM lists (respects add/remove)
+  rebuildItemsArrays(updatedJSON);
+  return updatedJSON;
+}
+
+/* ============== UI actions: generate, copy, save, saveLocal, loadLocal, clear ============== */
+
+const outputEl = document.getElementById('output');
+const outputCodeEl = document.getElementById('outputCode');
+const copyBtn = document.getElementById('copyBtn');
+const generateBtn = document.getElementById('generateBtn');
+const saveFileBtn = document.getElementById('saveFileBtn');
+const saveLocalBtn = document.getElementById('saveLocalBtn');
+const loadLocalBtn = document.getElementById('loadLocalBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+function showToast(msg = 'Done') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+/* generate JSON and show it (enable copy button) */
+generateBtn.addEventListener('click', () => {
+  const obj = buildJSON();
+  outputCodeEl.textContent = JSON.stringify(obj, null, 4);
+  outputEl.style.display = 'block';
+  copyBtn.style.display = 'inline-block';
+});
+
+/* copy JSON */
+copyBtn.addEventListener('click', () => {
+  const txt = outputCodeEl.textContent;
+  if (!txt) return showToast('Nothing to copy');
+  navigator.clipboard.writeText(txt).then(() => showToast('JSON copied to clipboard!')).catch(()=> {
+    showToast('Copy failed');
+  });
+});
+
+/* save JSON as file */
+saveFileBtn.addEventListener('click', () => {
+  const obj = buildJSON();
+  const jsonText = JSON.stringify(obj, null, 4);
+  // show output if hidden
+  if (outputEl.style.display !== 'block') {
+    outputCodeEl.textContent = jsonText;
+    outputEl.style.display = 'block';
+    copyBtn.style.display = 'inline-block';
+  }
+  const blob = new Blob([jsonText], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'config.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('JSON downloaded');
+});
+
+/* save locally into localStorage (stores the full built JSON object) */
+saveLocalBtn.addEventListener('click', () => {
+  const obj = buildJSON();
+  localStorage.setItem('formData', JSON.stringify(obj));
+  showToast('Form saved locally');
+});
+
+/* load saved JSON from localStorage and populate form */
+loadLocalBtn.addEventListener('click', () => {
+  const raw = localStorage.getItem('formData');
+  if (!raw) { showToast('No saved data'); return; }
+  try {
+    const saved = JSON.parse(raw);
+    populateFromSaved(saved);
+    showToast('Saved form loaded');
+  } catch (e) {
+    console.error(e);
+    showToast('Failed to load saved data');
+  }
+});
+
+/* clear form: restore defaults (not empty), remove saved localStorage key */
+clearBtn.addEventListener('click', () => {
+  // remove local storage
+  localStorage.removeItem('formData');
+  // repopulate from defaults object
+  populateFromSaved(defaults);
+  showToast('Form reset to defaults');
+});
+
+/* populateFromSaved: given a saved object (same shape as template), update DOM inputs accordingly.
+   - rebuild each .items-container according to saved array length (or defaults if not present)
+   - set other [data-field-id] inputs using valueMap paths (fall back to defaults if needed)
+*/
+function populateFromSaved(savedObj) {
+  // rebuild each items-container
+  document.querySelectorAll('.items-container').forEach(container => {
+    const path = JSON.parse(container.dataset.path); // e.g. ["modal","members","welcomeStep","items"]
+    const savedArr = getByPath(savedObj, path) || [];
+    const defaultArr = getByPath(defaults, path) || [];
+    // clear container
+    container.innerHTML = '';
+    // determine items to render: savedArr if present else defaultArr else 1 empty
+    if (savedArr.length > 0) {
+      for (let i=0;i<savedArr.length;i++) {
+        addBulletItem(container, path, i, defaultArr[i] || {}, savedArr[i] || {});
+      }
+    } else if (defaultArr.length > 0) {
+      for (let i=0;i<defaultArr.length;i++) {
+        addBulletItem(container, path, i, defaultArr[i] || {});
+      }
+    } else {
+      addBulletItem(container, path, 0, {});
+    }
+    // append Add Item button if welcome items location
+    const pathStr = path.join('.');
+    if (/modal\.(members|anonymous)\.welcomeStep\.items$/.test(pathStr)) {
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'add-bullet-btn';
+      addBtn.textContent = '+ Add Item';
+      addBtn.addEventListener('click', () => {
+        const nextIndex = container.querySelectorAll('.bullet-item').length;
+        addBulletItem(container, path, nextIndex, {});
+      });
+      container.appendChild(addBtn);
+    }
+  });
+
+  // set primitive inputs (all [data-field-id] inputs)
+  document.querySelectorAll('[data-field-id]').forEach(inp => {
+    const key = inp.dataset.fieldId;
+    const mapEntry = valueMap.get(key);
+    if (!mapEntry) return;
+    // use the first path defined for that field id (most fields only have one)
+    const p = mapEntry.paths[0];
+    const valFromSaved = getByPath(savedObj, p);
+    const valFromDefaults = getByPath(defaults, p);
+    if (valFromSaved !== undefined && valFromSaved !== null && String(valFromSaved).length >= 0) {
+      // set to saved value and color as user-entered
+      inp.value = String(valFromSaved);
+      inp.style.color = '#000';
+    } else if (valFromDefaults !== undefined && valFromDefaults !== null && String(valFromDefaults).length > 0) {
+      // set to default (muted)
+      inp.value = String(valFromDefaults);
+      inp.style.color = 'var(--muted)';
+      inp.dataset.default = String(valFromDefaults);
+    } else {
+      inp.value = '';
+      inp.style.color = '#000';
+      inp.dataset.default = '';
+    }
+  });
+
+  // show output area with the loaded JSON
+  const jsonText = JSON.stringify(savedObj, null, 4);
+  outputCodeEl.textContent = jsonText;
+  outputEl.style.display = 'block';
+  copyBtn.style.display = 'inline-block';
+}
+
+/* On first load, populate the form with defaults (so user sees the default values as muted) */
+populateFromSaved(defaults);
+
+/* Optional: if you want to auto-load saved on page load uncomment below (keeps defaults otherwise)*/
+   const savedRaw = localStorage.getItem('formData');
+   if (savedRaw) { try { populateFromSaved(JSON.parse(savedRaw)); } catch(e){} }
+
+
+</script>
+</body>
+</html>

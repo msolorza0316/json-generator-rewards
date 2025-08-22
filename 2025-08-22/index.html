@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Form Generator</title>
+<link rel="stylesheet" href="style.css">
+<!-- JS scripts in header as requested -->
+<script src="template.js" defer></script>
+<script src="utils.js" defer></script>
+<script src="renderForm.js" defer></script>
+<script src="generateJSON.js" defer></script>
+<script src="storage.js" defer></script>
+<script src="loadNBData.js" defer></script>
+<script src="main.js" defer></script>
+</head>
+<body>
+<div class="container">
+    <h2>JSON Form Generator</h2>
+
+    <div class="nb-data" id="nb-data" style="display:none;">
+         <div id="productName">Chimes test</div>
+         <div id="redirectURL">https://t.finder.com/aff_c?offer_id=25836&aff_id=1043</div>
+         <div id="nb-providerID">Chimes</div>
+    </div>
+
+    <div id="formContainer"></div>
+
+    <div class="form-section">
+        <button id="generateBtn">Generate JSON</button>
+        <button id="saveLocalBtn">Save Locally</button>
+        <button id="loadLocalBtn">Load Saved</button>
+        <button id="clearFormBtn" class="btn-danger">Clear Form</button>
+        <button id="loadNBData" class="btn-nbData">Load NB data</button>
+    </div>
+
+    <div class="output-container" id="outputContainer">
+        <pre id="output"></pre>
+        <div class="copy-btn-pre" id="copyBtn">Copy JSON</div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{
+    "modal": {
+        "members": {
+            "detailStep": {
+                "title": "Get $150 from Finder",
+                "ctaText": "Go to Chime",
+                "subtitleText": "The email you register with Finder and Chime must be the same to be eligible for the $150 gift card"
+            },
+            "welcomeStep": {
+                "items": [
+                    {
+                        "text": "Tell us your first and last name.",
+                        "description": "test"
+                    },
+                    {
+                        "text": "Open a Chime Checking Account online via Finder. You must click through from Finder to be eligible.",
+                        "description": "test"
+                    },
+                    {
+                        "text": "Receive $150 gift card within 90 days",
+                        "description": "test"
+                    }
+                ],
+                "title": "Get $150 from Finder",
+                "copyText": "Ends on September 30, 2025",
+                "abortText": "SKIP REWARD, CONTINUE TO CHIME",
+                "termsText": "T&Cs apply",
+                "continueText": "\"GET $150 REWARD",
+                "subtitleText": "test"
+            },
+            "redirectStep": {
+                "title": "You're a Finder member!",
+                "ctaText": "Go to Chime",
+                "subtitleText": "Continue on to the Chime's website to open a Chime Checking Account"
+            }
+        },
+        "anonymous": {
+            "loginStep": {
+                "title": "Get $150 from Finder",
+                "subtitleText": "Use the same email address to register with Finder and Chime to qualify for the $150 gift card."
+            },
+            "welcomeStep": {
+                "items": [
+                    {
+                        "text": "Click Get $150 Reward",
+                        "description": "And quickly create a Finder account."
+                    },
+                    {
+                        "text": "Open a Chime Checking Account and set up direct deposit",
+                        "description": "Must receive a qualifying direct deposit of $200 or more within 30 days from enrollment."
+                    },
+                    {
+                        "text": "\"Receive $150 gift card within 90 days.",
+                        "description": "Your Finder account email must be the same as the email used to create your Chime Checking Account."
+                    }
+                ],
+                "title": "Get $150 from Finder",
+                "copyText": "Ends on September 30, 2025 T&Cs apply",
+                "abortText": "SKIP REWARD, CONTINUE TO CHIME",
+                "termsText": "T&C",
+                "continueText": "GET $150 REWARD",
+                "subtitleText": "test"
+            }
+        }
+    },
+    "banner": {
+        "mode": "modal",
+        "title": "Get $150 from Finder",
+        "ctaText": "GET DEAL",
+        "iconUrl": "https://www.finder.com/niche-builder/664f49da27c8f.png",
+        "copyText": "Open a Chime Checking Account online through Finder by September 30, 2025 to receive a <b>$150 gift card</b>",
+        "metaData": {
+            "niche": "USFSL",
+            "productId": "8d63b410-9934-4265-88be-09dd0fd8df49",
+            "productName": "Chime",
+            "redirectUrl": "etoro-us-secure",
+            "providerName": "Chime"
+        },
+        "badgeText": "\"FINDER REWARDS EXCLUSIVE",
+        "termsText": "Separate T&Cs apply",
+        "titleHighlight": "$150"
+    },
+    "common": {
+        "termsUrl": "\"https://www.finder.com/about-us/finder-150-chime-promotion-terms-and-conditions-testing"
+    }
+}

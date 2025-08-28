@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JSON Form — fixed nested output</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #f2f2f2; }
+.container { max-width: 950px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+h2 { margin-top: 0; text-align: center; color: #333; }
+.form-section { margin-bottom: 20px; padding: 15px; border-radius: 8px; background: #fafafa; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+label { display: block; margin: 6px 0 4px 0; font-weight: bold; color: #444; }
+input[type="text"] { width: calc(100% - 12px); padding: 6px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; color: #333; background: #fff; }
+input[type="text"].placeholder { color: #999; }
+input[readonly] { background: #eee; pointer-events: none; }
+button { margin: 5px 5px 5px 0; padding: 6px 12px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+button:hover { background: #0056b3; }
+button.btn-danger { background: #dc3545; }
+button.btn-danger:hover { background: #a71d2a; }
+button.btn-nbData { background: #0f812c; }
+button.btn-nbData:hover { background: #35dc59; }
+.output-container { margin-top: 20px; display: none; position: relative; }
+pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 6px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; position: relative; }
+.copy-btn-pre { position: absolute; top: 10px; right: 10px; padding: 5px 10px; font-size: 12px; background: #28a745; border-radius: 4px; cursor: pointer; color: white; }
+.toast { visibility: hidden; min-width: 200px; background: #333; color: #fff; text-align: center; border-radius: 6px; padding: 10px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1; opacity: 0; transition: opacity 0.5s, visibility 0.5s; }
+.toast.show { visibility: visible; opacity: 1; }
+.bullet-item { padding: 10px; margin-bottom: 10px; border-radius: 6px; background: #f8f8f8; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); position: relative; }
+.bullet-item .item-buttons { position: absolute; top: 5px; right: 5px; display: flex; gap: 4px; }
+.bullet-item .item-buttons button { padding: 2px 6px; font-size: 12px; }
+.bullet-label { font-weight: 600; color: #4b6bf7; margin-bottom: 5px;font-size: 1.1rem;}
+.expander-header { cursor:pointer; display:flex; justify-content: space-between; align-items:center; background: #f1f1f1; padding: 5px 10px; border-radius: 4px; margin: 5px 0; }
+.expander-content { display:block; margin-left: 0; }
+.collapsed .expander-content { display:none; }
+.same-copy-row{ display:flex; align-items:center; gap:10px; margin:10px 0 5px 0; }
+.same-copy-label{ font-weight:600; color:#333; }
+.switch{ position:relative; display:inline-block; width:46px; height:24px; }
+.switch input{ display:none; }
+.slider{ position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.2s; border-radius:9999px; }
+.slider:before{ position:absolute; content:""; height:18px; width:18px; left:3px; top:3px; background:#fff; transition:.2s; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+.switch input:checked + .slider{ background:#28a745; }
+.switch input:checked + .slider:before{ transform:translateX(22px); }
+.same-copy-status{ min-width:24px; text-align:left; color:#555; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Finder Rewards JSON Form Generator</h2>
+
+  <div id="formWrapper"></div>
+
+  <div style="margin-top:12px;">
+    <button id="loadNBData" class="btn-nbData">Load NB Data</button>
+    <button id="generateBtn">Generate JSON</button>
+    <button id="copyBtn">Copy JSON</button>
+    <button id="saveLocalBtn">Save Locally</button>
+    <button id="loadLocalBtn">Load Saved</button>
+    <button id="clearBtn" class="btn-danger">Clear Saved</button>
+  </div>
+
+  <div class="output-container" id="outputContainer">
+    <pre id="output"></pre>
+    <button class="copy-btn-pre" id="copyPreBtn">Copy</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- hidden NB data -->
+  <div id="nb-data" style="display:none;">
+    <div id="productName">Chimes test</div>
+    <div id="redirectURL">https://t.finder.com/aff_c?offer_id=25836&aff_id=1043</div>
+    <div id="nb-providerID">Chimes</div>
+  </div>
+</div>
+
+<script>
+/* -------------------------
+   Template (starting data)
+   ------------------------- */
+const template = {
+  modal: {
+    members: {
+      detailStep: {
+        title: "Get $150 from Finder",
+        ctaText: "Go to Chime",
+        subtitleText: "The email you register with Finder and Chime must be the same to be eligible for the $150 gift card"
+      },
+      welcomeStep: {
+        items: [
+          { text: "Tell us your first and last name.", description: "" },
+          { text: "Open a Chime Checking Account online via Finder. You must click through from Finder to be eligible.", description: "" },
+          { text: "Receive $150 gift card within 90 days", description: "" }
+        ],
+        title: "Get $150 from Finder",
+        copyText: "Ends on September 30, 2025",
+        abortText: "SKIP REWARD, CONTINUE TO CHIME",
+        termsText: "T&Cs apply",
+        continueText: "GET $150 REWARD",
+        subtitleText: "test"
+      },
+      redirectStep: {
+        title: "You're a Finder member!",
+        ctaText: "Go to Chime",
+        subtitleText: "Continue on to the Chime's website to open a Chime Checking Account"
+      }
+    },
+    anonymous: {
+      loginStep: {
+        title: "Get $150 from Finder",
+        subtitleText: "Use the same email address to register with Finder and Chime to qualify for the $150 gift card."
+      },
+      welcomeStep: {
+        items: [
+          { text: "Click Get $150 Reward", description: "And quickly create a Finder account." },
+          { text: "Open a Chime Checking Account and set up direct deposit", description: "Must receive a qualifying direct deposit of $200 or more within 30 days from enrollment." },
+          { text: "\"Receive $150 gift card within 90 days.", description: "Your Finder account email must be the same as the email used to create your Chime Checking Account." }
+        ],
+        title: "Get $150 from Finder",
+        copyText: "Ends on September 30, 2025 T&Cs apply",
+        abortText: "SKIP REWARD, CONTINUE TO CHIME",
+        termsText: "T&C",
+        continueText: "GET $150 REWARD",
+        subtitleText: "test"
+      }
+    }
+  },
+  banner: {
+    mode: "modal",
+    title: "Get $150 from Finder",
+    ctaText: "GET DEAL",
+    iconUrl: "https://www.finder.com/niche-builder/664f49da27c8f.png",
+    copyText: "Open a Chime Checking Account online through Finder by September 30, 2025 to receive a <b>$150 gift card</b>",
+    metaData: {
+      niche: "USFSL",
+      productId: "8d63b410-9934-4265-88be-09dd0fd8df49",
+      productName: "Chime",
+      redirectUrl: "etoro-us-secure",
+      providerName: "Chime"
+    },
+    badgeText: "FINDER REWARDS EXCLUSIVE",
+    termsText: "Separate T&Cs apply",
+    titleHighlight: "$150"
+  },
+  common: {
+    termsUrl: "\"https://www.finder.com/about-us/finder-150-chime-promotion-terms-and-conditions-testing"
+  }
+};
+
+/* -------------------------
+   Helpers: get/set by path
+   pathParts: array of keys (numbers for arrays)
+   ------------------------- */
+function isNumberString(s){ return String(s).match(/^\d+$/) !== null; }
+
+function ensurePath(root, pathParts){
+  let ref = root;
+  for(let i=0;i<pathParts.length;i++){
+    const key = pathParts[i];
+    const isLast = i === pathParts.length - 1;
+    if(isNumberString(key)){
+      const idx = parseInt(key,10);
+      if(!Array.isArray(ref)) return null; // mismatch
+      if(isLast) return ref;
+      if(ref[idx] === undefined){
+        // decide next structure: if next key numeric -> array, else object
+        const nextKey = pathParts[i+1];
+        ref[idx] = isNumberString(nextKey) ? [] : {};
+      }
+      ref = ref[idx];
+    } else {
+      if(ref[key] === undefined){
+        if(isLast) ref[key] = {};
+        else {
+          const nextKey = pathParts[i+1];
+          ref[key] = isNumberString(nextKey) ? [] : {};
+        }
+      }
+      ref = ref[key];
+    }
+  }
+  return ref;
+}
+
+function setByPath(root, pathParts, value){
+  if(pathParts.length === 0) return;
+  // ensure parent exists
+  const parentParts = pathParts.slice(0, -1);
+  const lastKey = pathParts[pathParts.length-1];
+  let parent = parentParts.length ? ensurePath(root, parentParts) : root;
+  if(parent === null || parent === undefined) return;
+  if(isNumberString(lastKey)){
+    const idx = parseInt(lastKey,10);
+    if(!Array.isArray(parent)) {
+      // convert to array if safe
+      parent = parentParts.length ? (ensurePath(root,parentParts) || []) : [];
+    }
+    // fill up with empty objects if needed
+    while(parent.length <= idx) parent.push({});
+    parent[idx] = value;
+  } else {
+    parent[lastKey] = value;
+  }
+}
+
+function getByPath(root, pathParts){
+  let ref = root;
+  for(let i=0;i<pathParts.length;i++){
+    if(ref === undefined || ref === null) return undefined;
+    const key = pathParts[i];
+    if(isNumberString(key)){
+      const idx = parseInt(key,10);
+      if(!Array.isArray(ref)) return undefined;
+      ref = ref[idx];
+    } else {
+      ref = ref[key];
+    }
+  }
+  return ref;
+}
+
+/* -------------------------
+   UI Rendering
+   ------------------------- */
+const container = document.getElementById('formWrapper');
+let sameCopyState = false; // if true, members welcomeStep fields are mirrored from anonymous welcomeStep
+const sameCopyFields = ["copyText","abortText","termsText","continueText","subtitleText"];
+const sameCopyHandlers = {}; // to remove event listeners if toggled off
+
+function createInput(fieldLabel, pathParts, opts = {}){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'input-wrapper';
+  const lbl = document.createElement('label');
+  lbl.textContent = fieldLabel;
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  const pathKey = pathParts.join('.');
+  inp.dataset.fieldPath = pathKey;
+  // initial value from template
+  const val = getByPath(template, pathParts);
+  inp.value = val !== undefined && val !== null ? val : '';
+  // event updates template in-place
+  inp.addEventListener('input', (e)=>{
+    const v = e.target.value;
+    setByPath(template, pathParts.slice(), v);
+    // if this is one of the anonymous mirrored fields and sameCopyState true -> sync member
+    if(sameCopyState && pathKey.startsWith('modal.anonymous.welcomeStep.')){
+      const field = pathParts[pathParts.length-1];
+      if(sameCopyFields.includes(field)){
+        const memberPath = ['modal','members','welcomeStep', field];
+        setByPath(template, memberPath, v);
+        // if member input exists in DOM, update its display value (if hidden it's optional)
+        const memEl = document.querySelector(`input[data-field-path="${memberPath.join('.')}"]`);
+        if(memEl) memEl.value = v;
+      }
+    }
+  });
+  wrapper.appendChild(lbl);
+  wrapper.appendChild(inp);
+  return wrapper;
+}
+
+function renderItems(itemsArray, basePath){
+  const container = document.createElement('div');
+  itemsArray.forEach((it, idx)=>{
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'bullet-item';
+    const label = document.createElement('div');
+    label.className = 'bullet-label';
+    label.textContent = `Bullet point - ${idx+1}`;
+    itemDiv.appendChild(label);
+
+    const textPath = [...basePath, String(idx), 'text'];
+    const descPath = [...basePath, String(idx), 'description'];
+    itemDiv.appendChild( createInput('Main text (bold)', textPath) );
+    itemDiv.appendChild( createInput('Secondary text', descPath) );
+
+    const btns = document.createElement('div');
+    btns.className = 'item-buttons';
+    const add = document.createElement('button'); add.textContent = '+'; add.title='Add after';
+    add.addEventListener('click', ()=>{
+      // insert new empty item after idx
+      const arrRef = getByPath(template, basePath);
+      arrRef.splice(idx+1, 0, { text: "", description: "" });
+      renderForm();
+    });
+    const rem = document.createElement('button'); rem.textContent = '-'; rem.className='btn-danger';
+    rem.addEventListener('click', ()=>{
+      const arrRef = getByPath(template, basePath);
+      if(arrRef.length > 1){
+        arrRef.splice(idx,1);
+        renderForm();
+      }
+    });
+    btns.appendChild(add);
+    btns.appendChild(rem);
+    itemDiv.appendChild(btns);
+    container.appendChild(itemDiv);
+  });
+  return container;
+}
+
+function renderBanner(){
+  const sec = document.createElement('div');
+  sec.className = 'form-section';
+  const header = document.createElement('div'); header.className='expander-header';
+  const title = document.createElement('span'); title.textContent='Banner';
+  const arrow = document.createElement('span'); arrow.className='arrow'; arrow.textContent='▶';
+  header.appendChild(title); header.appendChild(arrow);
+  sec.appendChild(header);
+
+  // keep banner field order as in template sample
+  const bannerOrder = ["mode","title","ctaText","iconUrl","copyText","metaData","badgeText","termsText","titleHighlight"];
+  bannerOrder.forEach(key=>{
+    if(key === 'metaData'){
+      const md = template.banner.metaData || {};
+      // metaData order: niche, productId, productName, redirectUrl, providerName
+      ['niche','productId','productName','redirectUrl','providerName'].forEach(mk=>{
+        // ensure metaData exists
+        setByPath(template, ['banner','metaData',mk], md[mk] !== undefined ? md[mk] : '');
+        sec.appendChild(createInput(`metaData.${mk}`, ['banner','metaData',mk]));
+      });
+    } else {
+      // render input for non-meta fields, but don't allow editing mode
+      const readOnly = (key === 'mode'); // keep mode readonly if you want
+      sec.appendChild(createInput(key, ['banner', key]));
+      if(readOnly){
+        const el = sec.querySelector(`input[data-field-path="banner.${key}"]`);
+        if(el){ el.readOnly = true; el.tabIndex = -1; }
+      }
+    }
+  });
+
+  return sec;
+}
+
+function renderModal(){
+  const sec = document.createElement('div');
+  sec.className = 'form-section';
+  const header = document.createElement('div'); header.className='expander-header';
+  const title = document.createElement('span'); title.textContent='Modal';
+  const arrow = document.createElement('span'); arrow.className='arrow'; arrow.textContent='▶';
+  header.appendChild(title); header.appendChild(arrow);
+  sec.appendChild(header);
+
+  // MEMBERS section
+  const memWrap = document.createElement('div');
+  memWrap.className='form-section';
+  const memHeader = document.createElement('div'); memHeader.className='expander-header';
+  memHeader.innerHTML = '<span>Members</span><span class="arrow">▶</span>';
+  memWrap.appendChild(memHeader);
+
+  // detailStep fields
+  memWrap.appendChild(createInput('detailStep.title', ['modal','members','detailStep','title']));
+  memWrap.appendChild(createInput('detailStep.ctaText', ['modal','members','detailStep','ctaText']));
+  memWrap.appendChild(createInput('detailStep.subtitleText', ['modal','members','detailStep','subtitleText']));
+
+  // welcomeStep items + meta fields in defined order
+  memWrap.appendChild( document.createElement('hr') );
+  memWrap.appendChild( createInput('welcomeStep.title', ['modal','members','welcomeStep','title']) );
+  ['copyText','abortText','termsText','continueText','subtitleText'].forEach(k=>{
+    const el = createInput(`welcomeStep.${k}`, ['modal','members','welcomeStep',k]);
+    memWrap.appendChild(el);
+  });
+
+  // items array
+  const memItems = template.modal.members.welcomeStep.items || [];
+  memWrap.appendChild(renderItems(memItems, ['modal','members','welcomeStep','items']));
+
+  memWrap.appendChild( createInput('redirectStep.title', ['modal','members','redirectStep','title']) );
+  memWrap.appendChild( createInput('redirectStep.ctaText', ['modal','members','redirectStep','ctaText']) );
+  memWrap.appendChild( createInput('redirectStep.subtitleText', ['modal','members','redirectStep','subtitleText']) );
+
+  sec.appendChild(memWrap);
+
+  // ANONYMOUS section
+  const anonWrap = document.createElement('div');
+  anonWrap.className='form-section';
+  const anonHeader = document.createElement('div'); anonHeader.className='expander-header';
+  anonHeader.innerHTML = '<span>Anonymous</span><span class="arrow">▶</span>';
+  anonWrap.appendChild(anonHeader);
+
+  anonWrap.appendChild( createInput('loginStep.title', ['modal','anonymous','loginStep','title']) );
+  anonWrap.appendChild( createInput('loginStep.subtitleText', ['modal','anonymous','loginStep','subtitleText']) );
+
+  // same-copy toggle UI (placed in Anonymous)
+  const sameRow = document.createElement('div'); sameRow.className='same-copy-row';
+  const sameLabel = document.createElement('span'); sameLabel.className='same-copy-label'; sameLabel.textContent = 'Members is same copy';
+  const switchWrap = document.createElement('label'); switchWrap.className='switch';
+  const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = sameCopyState;
+  const slider = document.createElement('span'); slider.className='slider';
+  switchWrap.appendChild(cb); switchWrap.appendChild(slider);
+  const status = document.createElement('span'); status.className='same-copy-status'; status.textContent = sameCopyState ? 'Yes' : 'No';
+  sameRow.appendChild(sameLabel); sameRow.appendChild(switchWrap); sameRow.appendChild(status);
+  anonWrap.appendChild(sameRow);
+
+  cb.addEventListener('change', (e)=>{
+    sameCopyState = e.target.checked;
+    status.textContent = sameCopyState ? 'Yes' : 'No';
+    // when toggled ON: copy anonymous welcomeStep fields to members and hide members inputs for those fields
+    if(sameCopyState){
+      // copy values from anonymous to members immediately
+      sameCopyFields.forEach(field=>{
+        const anonVal = getByPath(template, ['modal','anonymous','welcomeStep',field]);
+        setByPath(template, ['modal','members','welcomeStep',field], anonVal);
+      });
+    }
+    // re-render to apply hiding/showing
+    renderForm();
+  });
+
+  // Anonymous welcomeStep fields and items
+  anonWrap.appendChild( createInput('welcomeStep.title', ['modal','anonymous','welcomeStep','title']) );
+  ['copyText','abortText','termsText','continueText','subtitleText'].forEach(k=>{
+    anonWrap.appendChild( createInput(`welcomeStep.${k}`, ['modal','anonymous','welcomeStep',k]) );
+  });
+
+  const anonItems = template.modal.anonymous.welcomeStep.items || [];
+  anonWrap.appendChild(renderItems(anonItems, ['modal','anonymous','welcomeStep','items']));
+
+  sec.appendChild(anonWrap);
+
+  // Add ability to add new items for each welcomeStep
+  // For members:
+  const addMemberItem = document.createElement('button'); addMemberItem.textContent = 'Add member item';
+  addMemberItem.addEventListener('click', ()=>{
+    template.modal.members.welcomeStep.items.push({ text: "", description: "" });
+    renderForm();
+  });
+  memWrap.appendChild(addMemberItem);
+  // For anonymous:
+  const addAnonItem = document.createElement('button'); addAnonItem.textContent = 'Add anonymous item';
+  addAnonItem.addEventListener('click', ()=>{
+    template.modal.anonymous.welcomeStep.items.push({ text: "", description: "" });
+    renderForm();
+  });
+  anonWrap.appendChild(addAnonItem);
+
+  return sec;
+}
+
+function renderCommon(){
+  const sec = document.createElement('div');
+  sec.className='form-section';
+  const header=document.createElement('div'); header.className='expander-header';
+  header.innerHTML = '<span>Common</span><span class="arrow">▶</span>';
+  sec.appendChild(header);
+  sec.appendChild( createInput('termsUrl', ['common','termsUrl']) );
+  return sec;
+}
+
+function renderForm(){
+  container.innerHTML = ''; // clear
+  // order: modal, banner, common (this follows your desired JSON order)
+  container.appendChild(renderModal());
+  container.appendChild(renderBanner());
+  container.appendChild(renderCommon());
+
+  // apply sameCopy: hide member inputs for mirrored fields (if enabled) and sync values
+  if(sameCopyState){
+    sameCopyFields.forEach(field=>{
+      // set member value equal to anonymous
+      const anonVal = getByPath(template, ['modal','anonymous','welcomeStep',field]);
+      setByPath(template, ['modal','members','welcomeStep',field], anonVal);
+      // hide member input
+      const memInput = document.querySelector(`input[data-field-path="modal.members.welcomeStep.${field}"]`);
+      if(memInput) memInput.parentElement.style.display = 'none';
+      // ensure anonymous input event will sync member value (already handled in createInput)
+    });
+  } else {
+    sameCopyFields.forEach(field=>{
+      const memInput = document.querySelector(`input[data-field-path="modal.members.welcomeStep.${field}"]`);
+      if(memInput) memInput.parentElement.style.display = '';
+    });
+  }
+}
+
+/* -------------------------
+   NB Data loader (one click)
+   ------------------------- */
+document.getElementById('loadNBData').addEventListener('click', ()=>{
+  const nb = document.getElementById('nb-data');
+  const nbName = nb.querySelector('#productName')?.textContent.trim() || '';
+  const nbRedirect = nb.querySelector('#redirectURL')?.textContent.trim() || '';
+  const nbProvider = nb.querySelector('#nb-providerID')?.textContent.trim() || '';
+
+  // apply into nested structure (no flattening)
+  setByPath(template, ['banner','metaData','productName'], nbName);
+  setByPath(template, ['banner','metaData','redirectUrl'], nbRedirect);
+  setByPath(template, ['banner','metaData','providerName'], nbProvider);
+
+  // also update the input elements immediately by re-rendering
+  renderForm();
+  showToast('NB data loaded successfully!');
+});
+
+/* -------------------------
+   JSON generation / copy / local storage
+   ------------------------- */
+function generateJSON(){
+  // no flattening — the template object is kept nested; just stringify it
+  document.getElementById('output').textContent = JSON.stringify(template, null, 2);
+  document.getElementById('outputContainer').style.display = 'block';
+}
+
+document.getElementById('generateBtn').addEventListener('click', generateJSON);
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(document.getElementById('output').textContent || '');
+  showToast('Copied to clipboard!');
+});
+document.getElementById('copyPreBtn').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(document.getElementById('output').textContent || '');
+  showToast('Copied to clipboard!');
+});
+
+document.getElementById('saveLocalBtn').addEventListener('click', ()=>{
+  localStorage.setItem('formTemplate', JSON.stringify(template));
+  showToast('Saved locally');
+});
+document.getElementById('loadLocalBtn').addEventListener('click', ()=>{
+  const s = localStorage.getItem('formTemplate');
+  if(!s){ showToast('No saved data'); return; }
+  try{
+    const parsed = JSON.parse(s);
+    // merge into template (replace root object)
+    Object.keys(template).forEach(k=>delete template[k]); // clear
+    Object.assign(template, parsed);
+    renderForm();
+    showToast('Loaded saved data');
+  }catch(e){ console.error(e); showToast('Failed to load'); }
+});
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  if(confirm('Clear saved template from localStorage?')){
+    localStorage.removeItem('formTemplate');
+    showToast('Cleared saved data');
+  }
+});
+
+/* -------------------------
+   Toast helper
+   ------------------------- */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+/* -------------------------
+   Initial render
+   ------------------------- */
+renderForm();
+</script>
+</body>
+</html>

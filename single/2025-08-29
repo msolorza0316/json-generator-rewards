@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Form Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f2f2f2;
+        }
+        
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+        
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fafafa;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        label {
+            display: block;
+            margin: 6px 0 4px 0;
+            font-weight: bold;
+            color: #444;
+        }
+        
+        input[type="text"] {
+            width: calc(100% - 12px);
+            padding: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            background: #fff;
+            border-color: #66afe9;
+            outline: none;
+            box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+        }
+        
+        input[type="text"].placeholder {
+            color: #888;
+            font-style: italic;
+        }
+        
+        input[readonly] {
+            background: #eee;
+            pointer-events: none;
+            color: #777;
+        }
+        
+        button {
+            margin: 5px 5px 5px 0;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.btn-danger {
+            background: #dc3545;
+        }
+        
+        button.btn-danger:hover {
+            background: #a71d2a;
+        }
+        
+        .output-container {
+            margin-top: 20px;
+            display: none;
+            position: relative;
+        }
+        
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            position: relative;
+        }
+        
+        .copy-btn-pre {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            background: #28a745;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .toast {
+            visibility: hidden;
+            min-width: 200px;
+            background: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .bullet-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background: #f8f8f8;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .bullet-item .item-buttons {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 4px;
+        }
+        
+        .bullet-item .item-buttons button {
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        
+        .bullet-label {
+            font-weight: 600;
+            color: #4b6bf7;
+            margin-bottom: 5px;
+            font-size: 1.3rem;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .toast.show {
+            opacity: 1 !important;
+            pointer-events: auto;
+        }
+        
+        .same-copy-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0 5px 0;
+        }
+        
+        .same-copy-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        
+        .switch input {
+            display: none;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            transition: .2s;
+            border-radius: 9999px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            top: 3px;
+            background: #fff;
+            transition: .2s;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+        
+        .switch input:checked + .slider {
+            background: #28a745;
+        }
+        
+        .switch input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        
+        .same-copy-status {
+            min-width: 24px;
+            text-align: left;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        .expander-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        
+        .expander-content {
+            display: block;
+            margin-left: 0;
+        }
+        
+        .expander-header span {
+            font-weight: 600;
+        }
+        
+        .expander-header .arrow {
+            transition: transform 0.2s;
+        }
+        
+        .collapsed .expander-content {
+            display: none;
+        }
+        
+        .collapsed .expander-header .arrow {
+            transform: rotate(-90deg);
+        }
+        
+        .status-bar {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-ready {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>JSON Form Generator</h2>
+        
+        <div id="statusBar" class="status-bar status-ready">Form is ready!</div>
+
+        <!-- Hidden NB Data -->
+        <div class="nb-data" id="nb-data" style="display:none;">
+            <div id="productName">Chimes test</div>
+            <div id="redirectURL">https://t.finder.com/aff_c?offer_id=25836&aff_id=1043</div>
+            <div id="nb-providerID">Chimes</div>
+        </div>
+
+        <div id="formContainer"></div>
+
+        <div class="form-section">
+            <button id="generateBtn">Generate JSON</button>
+            <button id="saveLocalBtn">Save Locally</button>
+            <button id="loadLocalBtn">Load Saved</button>
+            <button id="clearFormBtn" class="btn-danger">Clear Form</button>
+        </div>
+
+        <div class="output-container" id="outputContainer">
+            <pre id="output">{"message": "Generate JSON to see output"}</pre>
+            <div class="copy-btn-pre" id="copyBtn">Copy JSON</div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Global variables
+        let template = {};
+        const valueMap = new Map();
+        window.sameCopyState = "No";
+        window.sameCopyHandlers = {};
+        window.expanderState = {};
+
+        // Template data
+        const templateData = {
+            "modal": {
+                "members": {
+                    "detailStep": {
+                        "title": "Get $150 from Finder",
+                        "ctaText": "Go to Chime",
+                        "subtitleText": "The email you register with Finder and Chime must be the same to be eligible for the $150 gift card"
+                    },
+                    "welcomeStep": {
+                        "items": [
+                            {
+                                "text": "Tell us your first and last name.",
+                                "description": ""
+                            },
+                            {
+                                "text": "Open a Chime Checking Account online via Finder. You must click through from Finder to be eligible.",
+                                "description": ""
+                            },
+                            {
+                                "text": "Receive $150 gift card within 90 days",
+                                "description": ""
+                            }
+                        ],
+                        "title": "Get $150 from Finder",
+                        "copyText": "Ends on September 30, 2025",
+                        "abortText": "SKIP REWARD, CONTINUE to CHIME",
+                        "termsText": "T&Cs apply",
+                        "continueText": "GET $150 REWARD",
+                        "subtitleText": "test"
+                    },
+                    "redirectStep": {
+                        "title": "You're a Finder member!",
+                        "ctaText": "Go to Chime",
+                        "subtitleText": "Continue on to the Chime's website to open a Chime Checking Account"
+                    }
+                },
+                "anonymous": {
+                    "loginStep": {
+                        "title": "Get $150 from Finder",
+                        "subtitleText": "Use the same email address to register with Finder and Chime to qualify for the $150 gift card."
+                    },
+                    "welcomeStep": {
+                        "items": [
+                            {
+                                "text": "Click Get $150 Reward",
+                                "description": "And quickly create a Finder account."
+                            },
+                            {
+                                "text": "Open a Chime Checking Account and set up direct deposit",
+                                "description": "Must receive a qualifying direct deposit of $200 or more within 30 days from enrollment."
+                            },
+                            {
+                                "text": "Receive $150 gift card within 90 days.",
+                                "description": "Your Finder account email must be the same as the email used to create your Chime Checking Account."
+                            }
+                        ],
+                        "title": "Get $150 from Finder",
+                        "copyText": "Ends on September 30, 2025 T&Cs apply",
+                        "abortText": "SKIP REWARD, CONTINUE to CHIME",
+                        "termsText": "T&C",
+                        "continueText": "GET $150 REWARD",
+                        "subtitleText": "test"
+                    }
+                }
+            },
+            "banner": {
+                "mode": "modal",
+                "title": "Get $150 from Finder",
+                "ctaText": "GET DEAL",
+                "iconUrl": "https://www.finder.com/niche-builder/664f49da27c8f.png",
+                "copyText": "Open a Chime Checking Account online through Finder by September 30, 2025 to receive a <b>$150 gift card</b>",
+                "metaData": {
+                    "niche": "USFSL",
+                    "productId": "8d63b410-9934-4265-88be-09dd0fd8df49",
+                    "productName": "Chime",
+                    "redirectUrl": "redirect/share-trading/etoro-us-secure",
+                    "providerName": "Chime"
+                },
+                "badgeText": "FINDER REWARDS EXCLUSIVE",
+                "termsText": "Separate T&Cs apply",
+                "titleHighlight": "$150"
+            },
+            "common": {
+                "termsUrl": "https://www.finder.com/about-us/finder-150-chime-promotion-terms-and-conditions-testing"
+            }
+        };
+
+        // Utility functions
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.classList.add("show");
+            
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        function updateInputStyle(input) {
+            if (input.value === "" && !input.readOnly) {
+                input.classList.add("placeholder");
+            } else {
+                input.classList.remove("placeholder");
+            }
+        }
+
+        function renderInput(label, fieldId, defaultValue = "", readOnly = false) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "input-wrapper";
+            
+            const lbl = document.createElement("label");
+            lbl.textContent = label;
+            
+            const inp = document.createElement("input");
+            inp.type = "text";
+            inp.dataset.fieldId = fieldId;
+            
+            // Store the original value as a data attribute
+            inp.dataset.originalValue = defaultValue;
+            
+            if (defaultValue === "") {
+                inp.value = "";
+                inp.classList.add("placeholder");
+                inp.placeholder = "Enter value";
+            } else {
+                inp.value = defaultValue;
+            }
+            
+            if (readOnly) {
+                inp.readOnly = true;
+                inp.tabIndex = -1;
+            } else {
+                inp.addEventListener("focus", (e) => {
+                    // Clear the field when focused if it has the original value
+                    if (e.target.value === e.target.dataset.originalValue) {
+                        e.target.value = "";
+                    }
+                    e.target.classList.remove("placeholder");
+                });
+                
+                inp.addEventListener("blur", (e) => {
+                    // Restore original value if field is empty
+                    if (e.target.value === "") {
+                        e.target.value = e.target.dataset.originalValue;
+                        e.target.classList.add("placeholder");
+                    }
+                    updateInputStyle(e.target);
+                });
+
+                inp.addEventListener("input", (e) => {
+                    updateInputStyle(e.target);
+                });
+            }
+            
+            updateInputStyle(inp);
+            
+            wrapper.appendChild(lbl);
+            wrapper.appendChild(inp);
+            return wrapper;
+        }
+
+        function renderBulletPoints(array, path) {
+            const container = document.createElement("div");
+            
+            array.forEach((item, index) => {
+                const bulletDiv = document.createElement("div");
+                bulletDiv.className = "bullet-item";
+                
+                const bulletLabel = document.createElement("div");
+                bulletLabel.className = "bullet-label";
+                bulletLabel.textContent = `Bullet point - ${index + 1}`;
+                bulletDiv.appendChild(bulletLabel);
+                
+                let mainId = `${path.join(".")}.${index}.text`;
+                let secId = `${path.join(".")}.${index}.description`;
+                
+                valueMap.set(mainId, { paths: [[...path, index, "text"]], id: mainId });
+                valueMap.set(secId, { paths: [[...path, index, "description"]], id: secId });
+                
+                bulletDiv.appendChild(renderInput("Main text (bold)", mainId, item.text));
+                bulletDiv.appendChild(renderInput("Secondary text", secId, item.description));
+                
+                const btnDiv = document.createElement("div");
+                btnDiv.className = "item-buttons";
+                
+                const addBtn = document.createElement("button");
+                addBtn.textContent = "+";
+                addBtn.addEventListener("click", () => {
+                    array.splice(index + 1, 0, { text: "", description: "" });
+                    redrawForm();
+                });
+                
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "-";
+                removeBtn.addEventListener("click", () => {
+                    if (array.length > 1) {
+                        array.splice(index, 1);
+                        redrawForm();
+                    }
+                });
+                
+                btnDiv.appendChild(addBtn);
+                btnDiv.appendChild(removeBtn);
+                
+                bulletDiv.appendChild(btnDiv);
+                container.appendChild(bulletDiv);
+            });
+            
+            return container;
+        }
+
+        function renderSection(sectionName, obj, prefix = [], startCollapsed = false, topLevel = false) {
+            const sectionDiv = document.createElement("div");
+            sectionDiv.className = "form-section";
+            
+            const contentWrapper = document.createElement("div");
+            contentWrapper.className = "expander-content";
+            
+            if (sectionName && topLevel) {
+                const header = document.createElement("div");
+                header.className = "expander-header";
+                const titleSpan = document.createElement("span");
+                titleSpan.textContent = sectionName;
+                const arrow = document.createElement("span");
+                arrow.className = "arrow";
+                arrow.textContent = "▶";
+                header.appendChild(titleSpan);
+                header.appendChild(arrow);
+                
+                if (window.expanderState[sectionName] === undefined) {
+                    sectionDiv.classList.toggle("collapsed", sectionName !== "Banner");
+                    window.expanderState[sectionName] = sectionDiv.classList.contains("collapsed");
+                } else {
+                    sectionDiv.classList.toggle("collapsed", window.expanderState[sectionName]);
+                }
+                
+                header.addEventListener("click", () => {
+                    sectionDiv.classList.toggle("collapsed");
+                    window.expanderState[sectionName] = sectionDiv.classList.contains("collapsed");
+                });
+                
+                sectionDiv.appendChild(header);
+            }
+            
+            if (sectionName === "Modal - Anonymous") {
+                const row = document.createElement("div");
+                row.className = "same-copy-row";
+                const label = document.createElement("span");
+                label.className = "same-copy-label";
+                label.textContent = "Members is same copy";
+                
+                const switchWrap = document.createElement("label");
+                switchWrap.className = "switch";
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.id = "sameCopyToggle";
+                const slider = document.createElement("span");
+                slider.className = "slider";
+                switchWrap.appendChild(cb);
+                switchWrap.appendChild(slider);
+                
+                const status = document.createElement("span");
+                status.id = "sameCopyStatus";
+                status.className = "same-copy-status";
+                status.textContent = window.sameCopyState === "Yes" ? "Yes" : "No";
+                
+                row.appendChild(label);
+                row.appendChild(switchWrap);
+                row.appendChild(status);
+                contentWrapper.appendChild(row);
+            }
+            
+            if (prefix.join(".") === "banner") {
+                const bannerOrder = ["modal", "niche", "productId", "productName", "providerId", "providerName", "mode", "redirectUrl"];
+                bannerOrder.forEach(key => {
+                    if (obj[key] !== undefined) {
+                        const fieldId = [...prefix, key].join(".");
+                        valueMap.set(fieldId, { paths: [[...prefix, key]], id: fieldId });
+                        
+                        const inputEl = renderInput(key, fieldId, obj[key], key === "mode");
+                        contentWrapper.appendChild(inputEl);
+                        
+                        if (key === "mode" && obj.metaData) {
+                            for (let metaKey in obj.metaData) {
+                                const metaId = [...prefix, "metaData", metaKey].join(".");
+                                valueMap.set(metaId, { paths: [[...prefix, "metaData", metaKey]], id: metaId });
+                                contentWrapper.appendChild(renderInput(metaKey, metaId, obj.metaData[metaKey]));
+                            }
+                        }
+                    }
+                });
+            }
+            
+            for (let key in obj) {
+                if (key === "title" && obj !== template.modal.members.redirectStep) {
+                    continue;
+                }
+                
+                if (prefix.join(".") === "banner" && ["modal", "niche", "productId", "productName", "providerId", "providerName", "mode", "redirectUrl", "metaData"].includes(key)) continue;
+                
+                const value = obj[key];
+                const path = [...prefix, key];
+                
+                if (Array.isArray(value) && key === "items") {
+                    contentWrapper.appendChild(renderBulletPoints(value, path));
+                } else if (typeof value === "object" && value !== null) {
+                    contentWrapper.appendChild(renderSection(key, value, path, false, false));
+                } else {
+                    const fieldId = path.join(".");
+                    valueMap.set(fieldId, { paths: [path], id: fieldId });
+                    contentWrapper.appendChild(renderInput(key, fieldId, value));
+                }
+            }
+            
+            sectionDiv.appendChild(contentWrapper);
+            return sectionDiv;
+        }
+
+        function redrawForm() {
+            const formContainer = document.getElementById("formContainer");
+            formContainer.innerHTML = "";
+            
+            formContainer.appendChild(renderSection("Banner", template.banner, ["banner"], false, true));
+            formContainer.appendChild(renderSection("Modal - Anonymous", template.modal.anonymous, ["modal", "anonymous"], true, true));
+            formContainer.appendChild(renderSection("Modal - Members", template.modal.members, ["modal", "members"], true, true));
+            
+            if (template.common && template.common.termsUrl) {
+                const commonSection = renderSection("Common", template.common, ["common"], true, true);
+                formContainer.appendChild(commonSection);
+            }
+            
+            const sameToggle = document.getElementById("sameCopyToggle");
+            const sameStatus = document.getElementById("sameCopyStatus");
+            if (sameToggle) {
+                sameToggle.checked = (window.sameCopyState === "Yes");
+                if (sameStatus) sameStatus.textContent = sameToggle.checked ? "Yes" : "No";
+                sameToggle.addEventListener("change", () => {
+                    window.sameCopyState = sameToggle.checked ? "Yes" : "No";
+                    if (sameStatus) sameStatus.textContent = window.sameCopyState;
+                    applyMembersSameCopy();
+                });
+            }
+            
+            applyMembersSameCopy();
+        }
+
+        function applyMembersSameCopy() {
+            const FIELDS_TO_MIRROR = ["copyText", "abortText", "termsText", "continueText", "subtitleText"];
+            const isSame = (window.sameCopyState === "Yes");
+            
+            FIELDS_TO_MIRROR.forEach(field => {
+                const anonSel = `input[data-field-id="modal.anonymous.welcomeStep.${field}"]`;
+                const memSel = `input[data-field-id="modal.members.welcomeStep.${field}"]`;
+                const anonInput = document.querySelector(anonSel);
+                const memInput = document.querySelector(memSel);
+                
+                if (!anonInput || !memInput) return;
+                
+                const memWrapper = memInput.parentElement;
+                if (!memWrapper) return;
+                
+                if (isSame) {
+                    memInput.value = anonInput.value;
+                    updateInputStyle(memInput);
+                    memWrapper.style.display = "none";
+                    
+                    const prev = window.sameCopyHandlers[field];
+                    if (prev && prev.anonEl) {
+                        prev.anonEl.removeEventListener("input", prev.fn);
+                    }
+                    
+                    const fn = () => {
+                        const curAnon = document.querySelector(anonSel);
+                        const curMem = document.querySelector(memSel);
+                        if (curAnon && curMem) {
+                            curMem.value = curAnon.value;
+                            updateInputStyle(curMem);
+                        }
+                    };
+                    
+                    anonInput.addEventListener("input", fn);
+                    window.sameCopyHandlers[field] = { fn, anonEl: anonInput };
+                } else {
+                    memWrapper.style.display = "";
+                    const prev = window.sameCopyHandlers[field];
+                    if (prev && prev.anonEl) {
+                        prev.anonEl.removeEventListener("input", prev.fn);
+                    }
+                    delete window.sameCopyHandlers[field];
+                }
+            });
+        }
+
+        function buildTemplateFromForm() {
+            const updatedJSON = JSON.parse(JSON.stringify(template));
+            
+            const mainTitleInput = document.querySelector("input[data-field-id='banner.title']");
+            const mainTitleValue = mainTitleInput ? mainTitleInput.value : template.banner.title;
+            
+            function updateTitles(obj) {
+                for (let key in obj) {
+                    if (key === "title" && obj !== updatedJSON.modal.members.redirectStep) {
+                        obj[key] = mainTitleValue;
+                    } else if (typeof obj[key] === "object") {
+                        updateTitles(obj[key]);
+                    }
+                }
+            }
+            
+            updateTitles(updatedJSON);
+            
+            document.querySelectorAll("[data-field-id]").forEach(inp => {
+                const fieldId = inp.dataset.fieldId;
+                const value = inp.value;
+                
+                valueMap.forEach((data) => {
+                    if (data.id === fieldId) {
+                        data.paths.forEach(path => {
+                            let ref = updatedJSON;
+                            for (let i = 0; i < path.length - 1; i++) {
+                                ref = ref[path[i]];
+                            }
+                            if (!ref[path[path.length - 1]] || value !== "") {
+                                ref[path[path.length - 1]] = value;
+                            }
+                        });
+                    }
+                });
+            });
+            
+            return updatedJSON;
+        }
+
+        function showOutputJSON(obj) {
+            const outputEl = document.getElementById("output");
+            outputEl.textContent = JSON.stringify(obj, null, 4);
+            document.getElementById("outputContainer").style.display = "block";
+        }
+
+        // Initialize the application
+        function initApp() {
+            // Load template
+            template = JSON.parse(JSON.stringify(templateData));
+            
+            // Draw form
+            redrawForm();
+            
+            // Set up event listeners
+            document.getElementById("generateBtn").addEventListener("click", () => {
+                const updatedJSON = buildTemplateFromForm();
+                showOutputJSON(updatedJSON);
+                showToast("JSON generated!");
+            });
+            
+            document.getElementById("saveLocalBtn").addEventListener("click", () => {
+                const currentData = buildTemplateFromForm();
+                localStorage.setItem("savedJSON", JSON.stringify(currentData));
+                showToast("Saved locally!");
+                showOutputJSON(currentData);
+            });
+            
+            document.getElementById("loadLocalBtn").addEventListener("click", () => {
+                const saved = localStorage.getItem("savedJSON");
+                if (!saved) {
+                    showToast("No saved data found.");
+                    return;
+                }
+                
+                try {
+                    Object.assign(template, JSON.parse(saved));
+                    redrawForm();
+                    showOutputJSON(template);
+                    showToast("Loaded saved data!");
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to load saved data.");
+                }
+            });
+            
+            document.getElementById("clearFormBtn").addEventListener("click", () => {
+                localStorage.removeItem("savedJSON");
+                template = JSON.parse(JSON.stringify(templateData));
+                redrawForm();
+                document.getElementById("outputContainer").style.display = "none";
+                document.getElementById("output").textContent = '{"message": "Generate JSON to see output"}';
+                showToast("Form reverted to original template!");
+            });
+            
+            document.getElementById("copyBtn").addEventListener("click", () => {
+                const outputEl = document.getElementById("output");
+                if (!outputEl.textContent) return;
+                
+                navigator.clipboard.writeText(outputEl.textContent)
+                    .then(() => showToast("Copied to clipboard!"))
+                    .catch(() => alert("Copy failed!"));
+            });
+        }
+
+        // Start the application when the DOM is loaded
+        document.addEventListener("DOMContentLoaded", initApp);
+    </script>
+</body>
+</html>

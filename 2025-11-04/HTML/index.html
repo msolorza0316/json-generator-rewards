@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editable Rewards Card</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- ===== Blue Banner Card ===== -->
+  <div class="banner" id="rewardsCard">
+    <div class="banner__top" data-edit="ribbon" data-type="text">FINDER REWARDS EXCLUSIVE</div>
+    <div class="banner__body">
+      <div class="logo-box" data-edit="logo" title="Click to set an Image URL or drop/paste an image">
+        <img alt="Logo" id="logoImg" referrerpolicy="no-referrer" src="https://www.finder.com/niche-builder/664f49da27c8f.png?fit=1200">
+      </div>
+      <div>
+        <span class="category-pill" data-edit="badge">CHECKING ACCOUNT</span>
+        <h2 class="headline" data-edit="headline">Get <span class="amount">$150</span> from Finder</h2>
+        <p class="copy" data-edit="copy">Open a Chime Checking Account online through Finder by October 30, 2025 to receive a $150 digital Visa gift card.</p>
+        <div class="tnc-link" data-urlcontrol="tnc" role="button" tabindex="0" title="Click to set the Terms & Conditions link">
+          <span data-edit="tncText">Separate T&amp;Cs apply</span>
+        </div>
+      </div>
+      <a href="#" class="cta" data-edit="ctaLink"><span class="cta__label" data-edit="ctaText">GET DEAL</span></a>
+      <div class="tip">Click sections to edit. Enter saves. Esc cancels. Click logo, button area, or terms link to set URLs.</div>
+    </div>
+  </div>
+
+  <!-- ===== Modal-style Card (2nd) ===== -->
+  <div class="modal-card" id="modalCard">
+    <div class="modal-art" aria-label="Image placeholder"><img alt="fu" src="https://github.com/msolorza0316/rewards-JSON-visual-generator/blob/main/1.png?raw=true"></div>
+    <h2 class="modal-title" data-edit="modalTitle">Get $150 from Finder</h2>
+
+    <div class="steps">
+      <div class="step" data-edit="step1">
+        <div class="num">1</div>
+        <div class="text">
+          <div class="title" data-edit="step1Title">Click Get $150 Reward</div>
+          <div class="sub" data-edit="step1Sub">And quickly create a Finder account.</div>
+        </div>
+      </div>
+
+      <div class="step" data-edit="step2">
+        <div class="num">2</div>
+        <div class="text">
+          <div class="title" data-edit="step2Title">Open a Chime Checking Account and set up direct deposit</div>
+          <div class="sub" data-edit="step2Sub">Must receive a qualifying direct deposit of $200 or more within 30 days from enrollment.</div>
+        </div>
+      </div>
+
+      <div class="step" data-edit="step3">
+        <div class="num">3</div>
+        <div class="text">
+          <div class="title" data-edit="step3Title">Receive $150 digital Visa gift card within 120 days.</div>
+          <div class="sub" data-edit="step3Sub">Your Finder account email must be the same as the email used to create your Chime Checking Account.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="modal-cta" type="button" data-nourl><span data-edit="modalPrimaryText">GET $150 REWARD</span></button>
+    <button class="modal-cta-secondary" type="button" data-nourl><span data-edit="modalSecondaryText">SKIP REWARD, CONTINUE TO CHIME</span></button>
+
+    <div class="modal-footer" data-edit="modalFooter">Ends on October 30, 2025 T&amp;Cs apply</div>
+  </div>
+
+  <!-- ===== Signup-style Card (3rd) ===== -->
+  <div class="sign-card" id="signupCard">
+    <div class="sign-art" aria-label="Image placeholder"><img alt="fu" src="https://github.com/msolorza0316/rewards-JSON-visual-generator/blob/main/1.png?raw=true"></div>
+
+    <h2 class="sign-title" data-edit="signTitle">Get $150 from Finder</h2>
+    <div class="sign-note" data-edit="signSubtitle">
+      Use the same email address to register with Finder and Chime to qualify for the $150 digital Visa gift card.
+    </div>
+
+    <div class="form" aria-hidden="false">
+      <div class="form-label">Email address</div>
+      <input class="input" type="email" placeholder="" aria-label="Email address" />
+      <div class="or-sep"><span>or</span></div>
+
+      <button class="google-btn" type="button" aria-label="Continue with Google" data-nourl>
+        <div class="g-chip">
+          <span class="g-avatar"></span>
+          <span>Continue as Mario</span>
+          <span class="g-caret">▾</span>
+        </div>
+        <div class="g-email">mario.solorza@finder…</div>
+        <div class="g-logo" aria-hidden="true"></div>
+      </button>
+
+      <div class="terms">
+        By creating an account you agree to our
+        <a href="#" rel="noopener">terms of use</a> and
+        <a href="#" rel="noopener">privacy policy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Success-style Card (4th) ===== -->
+  <div class="success-card" id="successCard">
+    <div class="success-art" aria-label="Success art placeholder"><img alt="fu" src="https://github.com/msolorza0316/rewards-JSON-visual-generator/blob/main/4.png?raw=true"></div>
+    <h3 class="success-title" data-edit="successTitle">You're a Finder member!</h3>
+    <div class="success-sub" data-edit="successSub">Continue on to the Chime website to open a Chime Checking Account.</div>
+    <button class="success-cta" type="button" data-nourl><span data-edit="successCtaText">GO TO CHIME</span></button>
+  </div>
+
+
+<!-- ===== Meta Form (writes to banner.metaData) ===== -->
+<div class="meta-form" id="metaForm">
+  <div class="meta-form__title">Banner Meta</div>
+<div class="meta-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:6px;">
+    <label class="meta-field">
+      <span class="meta-label">Niche</span>
+      <input id="metaNiche" type="text" class="input" placeholder="e.g. USFSA-CHK" />
+    </label>
+    <label class="meta-field">
+      <span class="meta-label">Product ID</span>
+      <input id="metaProductId" type="text" class="input" placeholder="e.g. 92685d66-f22f-4fe4-b19e-d7fc9c3dd72f" />
+    </label>
+    <label class="meta-field">
+      <span class="meta-label">Product Name</span>
+      <input id="metaProductName" type="text" class="input" placeholder="e.g. Chime" />
+    </label>
+    <label class="meta-field">
+      <span class="meta-label">Provider Name</span>
+      <input id="metaProviderName" type="text" class="input" placeholder="e.g. Chime" />
+    </label>
+  </div>
+  <div class="meta-hint" style='display: none;'>
+    Values here feed <code>banner.metaData</code>. (The pill still maps to <code>banner.nicheText</code>.)
+  </div>
+</div>
+
+
+
+  <!-- Controls -->
+  <div class="controls">
+    <button id="generateBtn">Generate banner JSON</button>
+    <button id="copyJsonBtn">Copy JSON</button>
+    <button id="saveJsonBtn">Save JSON</button>
+    <button id="loadJsonBtn">Load from JSON</button>
+    <input id="loadJsonFile" type="file" accept="application/json" style="display:none" />
+    <button id="resetBtn" title="Clear autosave and restore defaults">Reset All</button>
+
+  </div>
+
+  <pre id="jsonOutput"></pre>
+
+  <!-- URL Popover -->
+  <div class="popover" id="urlPopover" role="dialog" aria-modal="true">
+    <div style="font-size:12px; opacity:.8; margin-bottom:6px;" id="popoverTitle">Set URL</div>
+    <div class="popover__row">
+      <input type="url" id="popoverInput" />
+      <button class="btn--save" id="popoverSave">Save</button>
+      <button class="btn--cancel" id="popoverCancel">Cancel</button>
+    </div>
+  </div>
+
+
+
+</body>
+</html>
